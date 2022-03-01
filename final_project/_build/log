@@ -1,9 +1,10 @@
-# dune build
+# dune test
 # OCAMLPARAM: unset
 # Shared cache: disabled
-# Workspace root: /home/nibroc/3110/final_project/final_project
-# Auto-detected concurrency: 12
-$ /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -config > /tmp/dune_cd28d0_output
+# Workspace root:
+# /Users/SanjanaNandi/Workspace/3110/final_project/final_project
+# Auto-detected concurrency: 8
+$ /Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/nd/gfhyxcss7sq3k3t8ngps3m780000gq/T/dune_714c37_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -13,75 +14,79 @@ $ /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -config > /tmp/dune_cd28d0_out
 #  ; fdo_target_exe = None
 #  ; build_dir = "default"
 #  ; toplevel_path =
-#      Some External "/home/nibroc/.opam/cs3110-2021fa/lib/toplevel"
-#  ; ocaml_bin = External "/home/nibroc/.opam/cs3110-2021fa/bin"
-#  ; ocaml = Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocaml"
-#  ; ocamlc = External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt"
-#  ; ocamlopt = Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt"
-#  ; ocamldep = Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamldep.opt"
+#      Some External "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/toplevel"
+#  ; ocaml_bin = External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin"
+#  ; ocaml = Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocaml"
+#  ; ocamlc = External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt"
+#  ; ocamlopt =
+#      Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlopt.opt"
+#  ; ocamldep =
+#      Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamldep.opt"
 #  ; ocamlmklib =
-#      Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamlmklib.opt"
+#      Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlmklib.opt"
 #  ; env =
 #      map
-#        { "DUNE_OCAML_HARDCODED" : "/home/nibroc/.opam/cs3110-2021fa/lib"
-#        ; "DUNE_OCAML_STDLIB" : "/home/nibroc/.opam/cs3110-2021fa/lib/ocaml"
-#        ; "DUNE_SOURCEROOT" : "/home/nibroc/3110/final_project/final_project"
+#        { "DUNE_OCAML_HARDCODED" :
+#            "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib"
+#        ; "DUNE_OCAML_STDLIB" :
+#            "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/ocaml"
+#        ; "DUNE_SOURCEROOT" :
+#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project"
 #        ; "INSIDE_DUNE" :
-#            "/home/nibroc/3110/final_project/final_project/_build/default"
+#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/default"
+#        ; "MANPATH" :
+#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/bin"
 #        ; "OCAMLFIND_IGNORE_DUPS_IN" :
-#            "/home/nibroc/3110/final_project/final_project/_build/install/default/lib"
+#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/lib"
 #        ; "OCAMLPATH" :
-#            "/home/nibroc/3110/final_project/final_project/_build/install/default/lib"
+#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/lib"
 #        ; "OCAMLTOP_INCLUDE_PATH" :
-#            "/home/nibroc/3110/final_project/final_project/_build/install/default/lib/toplevel"
+#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/lib/toplevel"
 #        ; "OCAML_COLOR" : "always"
 #        ; "OPAMCOLOR" : "always"
 #        }
-#  ; findlib_path = [ External "/home/nibroc/.opam/cs3110-2021fa/lib" ]
+#  ; findlib_path = [ External "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib" ]
 #  ; arch_sixtyfour = true
 #  ; natdynlink_supported = true
 #  ; supports_shared_libraries = true
 #  ; ocaml_config =
 #      { version = "4.12.0"
 #      ; standard_library_default =
-#          "/home/nibroc/.opam/cs3110-2021fa/lib/ocaml"
-#      ; standard_library = "/home/nibroc/.opam/cs3110-2021fa/lib/ocaml"
+#          "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/ocaml"
+#      ; standard_library = "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/ocaml"
 #      ; standard_runtime = "the_standard_runtime_variable_was_deleted"
 #      ; ccomp_type = "cc"
-#      ; c_compiler = "gcc"
-#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-fPIC" ]
+#      ; c_compiler = "cc"
+#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
 #      ; ocamlc_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
-#      ; ocamlopt_cflags =
-#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-fPIC" ]
+#      ; ocamlopt_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
 #      ; ocamlopt_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
 #      ; bytecomp_c_compiler =
-#          [ "gcc"
+#          [ "cc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
-#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
 #          ; "-D_REENTRANT"
 #          ]
-#      ; bytecomp_c_libraries = [ "-lm"; "-ldl"; "-lpthread" ]
+#      ; bytecomp_c_libraries = [ "-lm"; "-lpthread" ]
 #      ; native_c_compiler =
-#          [ "gcc"
+#          [ "cc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
-#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
 #          ; "-D_REENTRANT"
 #          ]
-#      ; native_c_libraries = [ "-lm"; "-ldl" ]
+#      ; native_c_libraries = [ "-lm" ]
 #      ; native_pack_linker = [ "ld"; "-r"; "-o" ]
 #      ; cc_profile = []
 #      ; architecture = "amd64"
 #      ; model = "default"
 #      ; int_size = 63
 #      ; word_size = 64
-#      ; system = "linux"
-#      ; asm = [ "as" ]
+#      ; system = "macosx"
+#      ; asm = [ "clang"; "-arch"; "x86_64"; "-Wno-trigraphs"; "-c" ]
 #      ; asm_cfi_supported = true
 #      ; with_frame_pointers = false
 #      ; ext_exe = ""
@@ -92,8 +97,8 @@ $ /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -config > /tmp/dune_cd28d0_out
 #      ; os_type = "Unix"
 #      ; default_executable_name = "a.out"
 #      ; systhread_supported = true
-#      ; host = "x86_64-pc-linux-gnu"
-#      ; target = "x86_64-pc-linux-gnu"
+#      ; host = "x86_64-apple-darwin21.3.0"
+#      ; target = "x86_64-apple-darwin21.3.0"
 #      ; profiling = false
 #      ; flambda = false
 #      ; spacetime = false
@@ -113,3 +118,4 @@ $ /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -config > /tmp/dune_cd28d0_out
 #      ; windows_unicode = false
 #      }
 #  }
+$ (cd _build/default/test && ./final_project.exe)
