@@ -1,10 +1,9 @@
-# dune exec bin/main.exe
+# dune build
 # OCAMLPARAM: unset
 # Shared cache: disabled
-# Workspace root:
-# /Users/SanjanaNandi/Workspace/3110/final_project/final_project
-# Auto-detected concurrency: 8
-$ /Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/nd/gfhyxcss7sq3k3t8ngps3m780000gq/T/dune_961504_output
+# Workspace root: /home/nibroc/3110/final_project/final_project
+# Auto-detected concurrency: 12
+$ /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -config > /tmp/dune_96f846_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -14,79 +13,75 @@ $ /Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/
 #  ; fdo_target_exe = None
 #  ; build_dir = "default"
 #  ; toplevel_path =
-#      Some External "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/toplevel"
-#  ; ocaml_bin = External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin"
-#  ; ocaml = Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocaml"
-#  ; ocamlc = External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt"
-#  ; ocamlopt =
-#      Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlopt.opt"
-#  ; ocamldep =
-#      Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamldep.opt"
+#      Some External "/home/nibroc/.opam/cs3110-2021fa/lib/toplevel"
+#  ; ocaml_bin = External "/home/nibroc/.opam/cs3110-2021fa/bin"
+#  ; ocaml = Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocaml"
+#  ; ocamlc = External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt"
+#  ; ocamlopt = Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt"
+#  ; ocamldep = Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamldep.opt"
 #  ; ocamlmklib =
-#      Ok External "/Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlmklib.opt"
+#      Ok External "/home/nibroc/.opam/cs3110-2021fa/bin/ocamlmklib.opt"
 #  ; env =
 #      map
-#        { "DUNE_OCAML_HARDCODED" :
-#            "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib"
-#        ; "DUNE_OCAML_STDLIB" :
-#            "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/ocaml"
-#        ; "DUNE_SOURCEROOT" :
-#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project"
+#        { "DUNE_OCAML_HARDCODED" : "/home/nibroc/.opam/cs3110-2021fa/lib"
+#        ; "DUNE_OCAML_STDLIB" : "/home/nibroc/.opam/cs3110-2021fa/lib/ocaml"
+#        ; "DUNE_SOURCEROOT" : "/home/nibroc/3110/final_project/final_project"
 #        ; "INSIDE_DUNE" :
-#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/default"
-#        ; "MANPATH" :
-#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/bin"
+#            "/home/nibroc/3110/final_project/final_project/_build/default"
 #        ; "OCAMLFIND_IGNORE_DUPS_IN" :
-#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/lib"
+#            "/home/nibroc/3110/final_project/final_project/_build/install/default/lib"
 #        ; "OCAMLPATH" :
-#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/lib"
+#            "/home/nibroc/3110/final_project/final_project/_build/install/default/lib"
 #        ; "OCAMLTOP_INCLUDE_PATH" :
-#            "/Users/SanjanaNandi/Workspace/3110/final_project/final_project/_build/install/default/lib/toplevel"
+#            "/home/nibroc/3110/final_project/final_project/_build/install/default/lib/toplevel"
 #        ; "OCAML_COLOR" : "always"
 #        ; "OPAMCOLOR" : "always"
 #        }
-#  ; findlib_path = [ External "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib" ]
+#  ; findlib_path = [ External "/home/nibroc/.opam/cs3110-2021fa/lib" ]
 #  ; arch_sixtyfour = true
 #  ; natdynlink_supported = true
 #  ; supports_shared_libraries = true
 #  ; ocaml_config =
 #      { version = "4.12.0"
 #      ; standard_library_default =
-#          "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/ocaml"
-#      ; standard_library = "/Users/SanjanaNandi/.opam/cs3110-2022sp/lib/ocaml"
+#          "/home/nibroc/.opam/cs3110-2021fa/lib/ocaml"
+#      ; standard_library = "/home/nibroc/.opam/cs3110-2021fa/lib/ocaml"
 #      ; standard_runtime = "the_standard_runtime_variable_was_deleted"
 #      ; ccomp_type = "cc"
-#      ; c_compiler = "cc"
-#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
+#      ; c_compiler = "gcc"
+#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-fPIC" ]
 #      ; ocamlc_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
-#      ; ocamlopt_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
+#      ; ocamlopt_cflags =
+#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-fPIC" ]
 #      ; ocamlopt_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
 #      ; bytecomp_c_compiler =
-#          [ "cc"
+#          [ "gcc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
+#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
 #          ; "-D_REENTRANT"
 #          ]
-#      ; bytecomp_c_libraries = [ "-lm"; "-lpthread" ]
+#      ; bytecomp_c_libraries = [ "-lm"; "-ldl"; "-lpthread" ]
 #      ; native_c_compiler =
-#          [ "cc"
+#          [ "gcc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
+#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
 #          ; "-D_REENTRANT"
 #          ]
-#      ; native_c_libraries = [ "-lm" ]
+#      ; native_c_libraries = [ "-lm"; "-ldl" ]
 #      ; native_pack_linker = [ "ld"; "-r"; "-o" ]
 #      ; cc_profile = []
 #      ; architecture = "amd64"
 #      ; model = "default"
 #      ; int_size = 63
 #      ; word_size = 64
-#      ; system = "macosx"
-#      ; asm = [ "clang"; "-arch"; "x86_64"; "-Wno-trigraphs"; "-c" ]
+#      ; system = "linux"
+#      ; asm = [ "as" ]
 #      ; asm_cfi_supported = true
 #      ; with_frame_pointers = false
 #      ; ext_exe = ""
@@ -97,8 +92,8 @@ $ /Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/
 #      ; os_type = "Unix"
 #      ; default_executable_name = "a.out"
 #      ; systhread_supported = true
-#      ; host = "x86_64-apple-darwin21.3.0"
-#      ; target = "x86_64-apple-darwin21.3.0"
+#      ; host = "x86_64-pc-linux-gnu"
+#      ; target = "x86_64-pc-linux-gnu"
 #      ; profiling = false
 #      ; flambda = false
 #      ; spacetime = false
@@ -118,3 +113,27 @@ $ /Users/SanjanaNandi/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/
 #      ; windows_unicode = false
 #      }
 #  }
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I test/.final_project.eobjs/byte -no-alias-deps -opaque -o test/.final_project.eobjs/byte/dune__exe__Final_project.cmi -c -intf test/final_project.mli)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I lib/.final_project.objs/byte -no-alias-deps -opaque -o lib/.final_project.objs/byte/final_project.cmo -c -impl lib/final_project.ml-gen)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamldep.opt -modules -impl lib/scraper.ml) > _build/default/lib/.final_project.objs/scraper.ml.d
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamldep.opt -modules -intf lib/scraper.mli) > _build/default/lib/.final_project.objs/scraper.mli.d
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/.final_project.objs/byte -I /home/nibroc/.opam/cs3110-2021fa/lib/curl -I /home/nibroc/.opam/cs3110-2021fa/lib/lambdasoup -I /home/nibroc/.opam/cs3110-2021fa/lib/markup -I /home/nibroc/.opam/cs3110-2021fa/lib/uutf -no-alias-deps -opaque -open Final_project -o lib/.final_project.objs/byte/final_project__Scraper.cmi -c -intf lib/scraper.mli)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/.final_project.objs/byte -I lib/.final_project.objs/native -I /home/nibroc/.opam/cs3110-2021fa/lib/curl -I /home/nibroc/.opam/cs3110-2021fa/lib/lambdasoup -I /home/nibroc/.opam/cs3110-2021fa/lib/markup -I /home/nibroc/.opam/cs3110-2021fa/lib/uutf -intf-suffix .ml -no-alias-deps -opaque -open Final_project -o lib/.final_project.objs/native/final_project__Scraper.cmx -c -impl lib/scraper.ml)
+> File "lib/scraper.ml", line 22, characters 19-27:
+> 22 |   with _ -> raise (IO_ERROR uri)
+>                         ^^^^^^^^
+> Error: This variant expression is expected to have type exn
+>        The constructor IO_ERROR does not belong to type exn
+[2]
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/.final_project.objs/byte -I /home/nibroc/.opam/cs3110-2021fa/lib/curl -I /home/nibroc/.opam/cs3110-2021fa/lib/lambdasoup -I /home/nibroc/.opam/cs3110-2021fa/lib/markup -I /home/nibroc/.opam/cs3110-2021fa/lib/uutf -intf-suffix .ml -no-alias-deps -opaque -open Final_project -o lib/.final_project.objs/byte/final_project__Scraper.cmo -c -impl lib/scraper.ml)
+> File "lib/scraper.ml", line 22, characters 19-27:
+> 22 |   with _ -> raise (IO_ERROR uri)
+>                         ^^^^^^^^
+> Error: This variant expression is expected to have type exn
+>        The constructor IO_ERROR does not belong to type exn
+[2]
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I bin/.main.eobjs/byte -I /home/nibroc/.opam/cs3110-2021fa/lib/curl -I /home/nibroc/.opam/cs3110-2021fa/lib/lambdasoup -I /home/nibroc/.opam/cs3110-2021fa/lib/markup -I /home/nibroc/.opam/cs3110-2021fa/lib/uutf -I lib/.final_project.objs/byte -no-alias-deps -opaque -o bin/.main.eobjs/byte/dune__exe__Main.cmi -c -intf bin/main.mli)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I lib/.final_project.objs/byte -I lib/.final_project.objs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o lib/.final_project.objs/native/final_project.cmx -c -impl lib/final_project.ml-gen)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I test/.final_project.eobjs/byte -I test/.final_project.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -o test/.final_project.eobjs/native/dune__exe__Final_project.cmx -c -impl test/final_project.ml)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I /home/nibroc/.opam/cs3110-2021fa/lib/curl -I /home/nibroc/.opam/cs3110-2021fa/lib/lambdasoup -I /home/nibroc/.opam/cs3110-2021fa/lib/markup -I /home/nibroc/.opam/cs3110-2021fa/lib/uutf -I lib/.final_project.objs/byte -I lib/.final_project.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
+$ (cd _build/default && /home/nibroc/.opam/cs3110-2021fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o test/final_project.exe test/.final_project.eobjs/native/dune__exe__Final_project.cmx)

@@ -1,0 +1,2 @@
+(** @canonical Final_project.Scraper *)
+module Scraper = Final_project__Scraper
