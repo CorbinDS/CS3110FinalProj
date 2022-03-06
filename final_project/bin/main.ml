@@ -1,5 +1,5 @@
-open Soup
-let _ = (read_file "Lambda Soup - Functional HTML Scraping for OCaml.html" |> parse $ "title" |> R.leaf_text |> print_endline)
+(* open Soup *)
 
+(* let _ = (string_of_uri "https://scl.cornell.edu/residential-life/dining/eateries-menus" |> parse |> texts |> List.map (fun x -> print_endline x)) *)
 
 

@@ -1,1 +1,1 @@
-lib/scraper.ml: Buffer Curl String
+lib/scraper.ml:
