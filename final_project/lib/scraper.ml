@@ -1,8 +1,8 @@
 (* Had to comment out half of this file so that it would compile because otherwise it wouldn't build *)
 
-(* open Curl *)
+open Soup
 
-(* exception URL_Error of string *)
+exception URL_Error of string
 
 type t
 (**The abstract type of dining locations and their links**)
@@ -15,7 +15,7 @@ type m
 This function was copied from: 
 https://stackoverflow.com/questions/4621454/reading-html-contents-of-a-url-in-ocaml*)
 
-(* let string_of_uri uri = 
+let string_of_uri uri = 
   try let connection = Curl.init () and write_buff = Buffer.create 1763 in
       Curl.set_writefunction connection
               (fun x -> Buffer.add_string write_buff x; String.length x);
@@ -23,7 +23,7 @@ https://stackoverflow.com/questions/4621454/reading-html-contents-of-a-url-in-oc
       Curl.perform connection;
       Curl.global_cleanup ();
       Buffer.contents write_buff;
-  with _ -> raise (URL_Error uri) *)
+  with _ -> raise (URL_Error uri)
 
 
 let from_net_nutrition (_s : string) =
@@ -41,3 +41,6 @@ let get_location _t (_s: string) =
 let from_location (_s : string) = 
   raise (Failure "from_location unimplmented")
 (** [from_location s] is the menu of dining location with link [s]**)
+
+let get_menus = 
+  string_of_uri "https://scl.cornell.edu/residential-life/dining/eateries-menus" |> parse |> texts
