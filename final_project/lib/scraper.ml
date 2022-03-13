@@ -10,8 +10,8 @@ type d = {
   name : string;
   location : string;
   contact : string;
-  description : string;
   hours : string list;
+  description : string;
 }
 (**The abstract type of dining locations and their information. **)
 
@@ -85,6 +85,15 @@ let rec separate_into_dining_halls (web : 'a list) (active : 'a list) =
            (list_after_element web (List.hd t) true)
            t
 
+let into_d lst =
+  {
+    name = List.hd lst;
+    location = List.nth lst 2;
+    contact = List.nth lst 3;
+    hours = list_between_elements lst "Hours" "Description" false false;
+    description = List.hd (list_after_element lst "Description" false);
+  }
+
 let get_active_eateries =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
@@ -93,3 +102,13 @@ let get_active_eateries =
          match leaf_text y with
          | None -> ""
          | Some b -> b)
+
+let get_available_menu_types =
+  string_of_uri
+    "https://scl.cornell.edu/residential-life/dining/eateries-menus"
+  |> parse $$ "summary" |> to_list
+  |> List.map (fun y ->
+         match leaf_text y with
+         | None -> ""
+         | Some b -> b)
+  |> List.sort_uniq compare
