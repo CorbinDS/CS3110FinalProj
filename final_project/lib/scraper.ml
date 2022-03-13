@@ -6,10 +6,22 @@ open Soup
 exception URL_Error of string
 exception ElementNotFound of string
 
-type t
+type d = {
+  name : string;
+  location : string;
+  contact : string;
+  description : string;
+  hours : string list;
+}
 (**The abstract type of dining locations and their information. **)
 
-type m
+type m = {
+  eatery : d;
+  menu_name : string;
+  start_time : int;
+  end_time : int;
+  menu_items : (string * string list) list;
+}
 (**The abstract type of the dining hall menus.*)
 
 (* This function was copied from:
@@ -32,28 +44,52 @@ let string_of_uri uri =
 let from_net_nutrition (_s : string) =
   raise (Failure "from_net_nutrition unimplemented")
 
-let get_location _t (_s : string) =
-  raise (Failure "get_location unimplemented")
-
-(** [from_location s] is the menu of dining location with link [s]**)
-let from_location (_s : string) =
-  raise (Failure "from_location unimplmented")
-
-let rec list_after_element lst element =
+let rec list_after_element lst element inc =
   match lst with
   | [] -> []
-  | [ h ] -> if h = element then [] else raise (ElementNotFound element)
-  | h :: t -> if h = element then t else list_after_element t element
+  | h :: t ->
+      if h = element && inc = false then t
+      else if h = element && inc = true then h :: t
+      else list_after_element t element inc
 
-let rec list_before_element lst element =
-  try list_after_element (List.rev lst) element |> List.rev
-  with ElementNotFound e -> raise (ElementNotFound e)
+let rec list_before_element lst element inc =
+  list_after_element (List.rev lst) element inc |> List.rev
 
-let get_trimmed_contents =
+let list_between_elements lst beginning ending binc einc =
   list_before_element
-    (list_after_element
-       (string_of_uri
-          "https://scl.cornell.edu/residential-life/dining/eateries-menus"
-       |> parse |> trimmed_texts)
-       "104West!")
-    "Quick Links"
+    (list_after_element lst beginning binc)
+    ending einc
+
+let get_webpage =
+  list_between_elements
+    (string_of_uri
+       "https://scl.cornell.edu/residential-life/dining/eateries-menus"
+    |> parse |> trimmed_texts)
+    "indicates healthy choices" "Quick Links" false false
+  |> List.filter (fun x -> if x = "Order Online" then false else true)
+
+(* let rec separate_into_dining_halls web active = match web with | []
+   -> [ [ "" ] ] | h :: t -> if h = List.hd active then if List.length
+   active = 1 then [ list_after_element t (List.hd active) true ] else
+   list_between_elements t (List.hd active) (List.hd (List.tl active))
+   true :: separate_into_dining_halls t (List.tl active) else
+   separate_into_dining_halls t active *)
+
+let rec separate_into_dining_halls (web : 'a list) (active : 'a list) =
+  match active with
+  | [] -> [ [] ]
+  | [ t ] -> [ list_after_element web t true ]
+  | h :: t ->
+      list_between_elements web h (List.hd t) true false
+      :: separate_into_dining_halls
+           (list_after_element web (List.hd t) true)
+           t
+
+let get_active_eateries =
+  string_of_uri
+    "https://scl.cornell.edu/residential-life/dining/eateries-menus"
+  |> parse $$ "a[hreflang]" |> to_list
+  |> List.map (fun y ->
+         match leaf_text y with
+         | None -> ""
+         | Some b -> b)
