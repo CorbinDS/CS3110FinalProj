@@ -10,7 +10,7 @@ type d = {
   name : string;
   location : string;
   contact : string;
-  hours : string list;
+  ophours : string list;
   description : string;
 }
 (**The abstract type of dining locations and their information. **)
@@ -18,8 +18,7 @@ type d = {
 type m = {
   eatery : d;
   menu_name : string;
-  start_time : int;
-  end_time : int;
+  hours : int list;
   menu_items : (string * string list) list;
 }
 (**The abstract type of the dining hall menus.*)
@@ -60,20 +59,13 @@ let list_between_elements lst beginning ending binc einc =
     (list_after_element lst beginning binc)
     ending einc
 
-let get_webpage =
+let webpage =
   list_between_elements
     (string_of_uri
        "https://scl.cornell.edu/residential-life/dining/eateries-menus"
     |> parse |> trimmed_texts)
     "indicates healthy choices" "Quick Links" false false
   |> List.filter (fun x -> if x = "Order Online" then false else true)
-
-(* let rec separate_into_dining_halls web active = match web with | []
-   -> [ [ "" ] ] | h :: t -> if h = List.hd active then if List.length
-   active = 1 then [ list_after_element t (List.hd active) true ] else
-   list_between_elements t (List.hd active) (List.hd (List.tl active))
-   true :: separate_into_dining_halls t (List.tl active) else
-   separate_into_dining_halls t active *)
 
 let rec separate_into_dining_halls (web : 'a list) (active : 'a list) =
   match active with
@@ -88,13 +80,14 @@ let rec separate_into_dining_halls (web : 'a list) (active : 'a list) =
 let into_d lst =
   {
     name = List.hd lst;
-    location = List.nth lst 2;
-    contact = List.nth lst 3;
-    hours = list_between_elements lst "Hours" "Description" false false;
+    location = List.nth lst 1;
+    contact = List.nth lst 2;
+    ophours =
+      list_between_elements lst "Hours" "Description" false false;
     description = List.hd (list_after_element lst "Description" false);
   }
 
-let get_active_eateries =
+let active_eateries =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
   |> parse $$ "a[hreflang]" |> to_list
@@ -103,7 +96,7 @@ let get_active_eateries =
          | None -> ""
          | Some b -> b)
 
-let get_available_menu_types =
+let available_menu_types =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
   |> parse $$ "summary" |> to_list
@@ -112,3 +105,65 @@ let get_available_menu_types =
          | None -> ""
          | Some b -> b)
   |> List.sort_uniq compare
+
+let available_stations =
+  string_of_uri
+    "https://scl.cornell.edu/residential-life/dining/eateries-menus"
+  |> parse $$ "strong" |> to_list
+  |> List.map (fun y ->
+         match leaf_text y with
+         | None -> ""
+         | Some b -> b)
+  |> List.sort_uniq compare
+
+let militarytime time =
+  Scanf.sscanf time "%d:%d%c%c" (fun h m t1 t2 ->
+      if t1 = 'a' && h = 12 then 0 + m
+      else if t1 = 'a' then (100 * h) + m
+      else if t1 = 'p' && h = 12 then 1200 + m
+      else (100 * h) + m + 1200)
+
+let hour_parse str =
+  List.map
+    (fun x -> String.trim x |> militarytime)
+    (String.split_on_char '-' str)
+
+let get_station_offering str : string list =
+  List.map String.trim (String.split_on_char '*' str)
+
+let rec get_stations (menu : string list) =
+  match menu with
+  | [] -> [ ("", [ "" ]) ]
+  | [ h ] -> [ ("", get_station_offering h) ]
+  | [ h; t ] -> [ (h, get_station_offering t) ]
+  | h :: t ->
+      (h, get_station_offering (List.hd t)) :: get_stations (List.tl t)
+
+let rec get_menus_helper
+    (hall : d)
+    (hours : string list)
+    (hall_menus : string list)
+    (menu_types : string list) : m list =
+  match hall_menus with
+  | [] -> []
+  | h :: t ->
+      if List.mem h menu_types = true then
+        {
+          eatery = hall;
+          menu_name = h;
+          hours = hour_parse (List.hd hours);
+          menu_items =
+            get_stations
+              (try
+                 list_before_element t
+                   (List.find (fun x -> List.mem x menu_types) t)
+                   false
+               with Not_found -> t);
+        }
+        :: get_menus_helper hall (List.tl hours) t menu_types
+      else get_menus_helper hall hours t menu_types
+
+let get_menus hallinfo =
+  get_menus_helper (into_d hallinfo) (into_d hallinfo).ophours
+    (list_after_element hallinfo "Featuring/Menu" false)
+    available_menu_types
