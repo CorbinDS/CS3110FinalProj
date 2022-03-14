@@ -1,2 +1,6 @@
+(** @canonical Final_project.Draw *)
+module Draw = Final_project__Draw
+
+
 (** @canonical Final_project.Scraper *)
 module Scraper = Final_project__Scraper

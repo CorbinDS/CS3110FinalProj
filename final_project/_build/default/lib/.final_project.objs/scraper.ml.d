@@ -1,1 +1,1 @@
-lib/scraper.ml: Buffer Curl List Soup String
+lib/scraper.ml: Buffer Curl List Scanf Soup String
