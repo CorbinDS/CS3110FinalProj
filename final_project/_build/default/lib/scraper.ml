@@ -1,10 +1,6 @@
-(* Had to comment out half of this file so that it would compile because
-   otherwise it wouldn't build *)
-
 open Soup
 
 exception URL_Error of string
-exception ElementNotFound of string
 
 type d = {
   name : string;
@@ -13,7 +9,6 @@ type d = {
   ophours : string list;
   description : string;
 }
-(**The abstract type of dining locations and their information. **)
 
 type m = {
   eatery : d;
@@ -21,7 +16,6 @@ type m = {
   hours : int list;
   menu_items : (string * string list) list;
 }
-(**The abstract type of the dining hall menus.*)
 
 (* This function was copied from:
    https://stackoverflow.com/questions/4621454/reading-html-contents-of-a-url-in-ocaml*)
@@ -37,11 +31,6 @@ let string_of_uri uri =
     Curl.global_cleanup ();
     Buffer.contents write_buff
   with _ -> raise (URL_Error uri)
-
-(** [from_net_nutrition s] is the dining locations and links from [s]
-    (http://netnutrition.dining.cornell.edu/NetNutrition/1).**)
-let from_net_nutrition (_s : string) =
-  raise (Failure "from_net_nutrition unimplemented")
 
 let rec list_after_element lst element inc =
   match lst with
@@ -66,26 +55,6 @@ let webpage =
     |> parse |> trimmed_texts)
     "indicates healthy choices" "Quick Links" false false
   |> List.filter (fun x -> if x = "Order Online" then false else true)
-
-let rec separate_into_dining_halls (web : 'a list) (active : 'a list) =
-  match active with
-  | [] -> [ [] ]
-  | [ t ] -> [ list_after_element web t true ]
-  | h :: t ->
-      list_between_elements web h (List.hd t) true false
-      :: separate_into_dining_halls
-           (list_after_element web (List.hd t) true)
-           t
-
-let into_d lst =
-  {
-    name = List.hd lst;
-    location = List.nth lst 1;
-    contact = List.nth lst 2;
-    ophours =
-      list_between_elements lst "Hours" "Description" false false;
-    description = List.hd (list_after_element lst "Description" false);
-  }
 
 let active_eateries =
   string_of_uri
@@ -116,6 +85,26 @@ let available_stations =
          | Some b -> b)
   |> List.sort_uniq compare
 
+let rec separate_into_dining_halls (web : 'a list) (active : 'a list) =
+  match active with
+  | [] -> [ [] ]
+  | [ t ] -> [ list_after_element web t true ]
+  | h :: t ->
+      list_between_elements web h (List.hd t) true false
+      :: separate_into_dining_halls
+           (list_after_element web (List.hd t) true)
+           t
+
+let into_d lst =
+  {
+    name = List.hd lst;
+    location = List.nth lst 1;
+    contact = List.nth lst 2;
+    ophours =
+      list_between_elements lst "Hours" "Description" false false;
+    description = List.hd (list_after_element lst "Description" false);
+  }
+
 let militarytime time =
   Scanf.sscanf time "%d:%d%c%c" (fun h m t1 t2 ->
       if t1 = 'a' && h = 12 then 0 + m
@@ -128,16 +117,17 @@ let hour_parse str =
     (fun x -> String.trim x |> militarytime)
     (String.split_on_char '-' str)
 
-let get_station_offering str : string list =
+let parse_station_offering str : string list =
   List.map String.trim (String.split_on_char '*' str)
 
 let rec get_stations (menu : string list) =
   match menu with
   | [] -> [ ("", [ "" ]) ]
-  | [ h ] -> [ ("", get_station_offering h) ]
-  | [ h; t ] -> [ (h, get_station_offering t) ]
+  | [ h ] -> [ ("", parse_station_offering h) ]
+  | [ h; t ] -> [ (h, parse_station_offering t) ]
   | h :: t ->
-      (h, get_station_offering (List.hd t)) :: get_stations (List.tl t)
+      (h, parse_station_offering (List.hd t))
+      :: get_stations (List.tl t)
 
 let rec get_menus_helper
     (hall : d)
@@ -167,3 +157,8 @@ let get_menus hallinfo =
   get_menus_helper (into_d hallinfo) (into_d hallinfo).ophours
     (list_after_element hallinfo "Featuring/Menu" false)
     available_menu_types
+
+(** [from_net_nutrition s] is the dining locations and links from [s]
+    (http://netnutrition.dining.cornell.edu/NetNutrition/1).**)
+let from_net_nutrition (_s : string) =
+  raise (Failure "from_net_nutrition unimplemented")
