@@ -1,3 +1,5 @@
 (library
  (name final_project)
- (libraries lambdasoup curl graphics))
+ (preprocess
+  (pps ppx_yojson_conv))
+ (libraries lambdasoup curl graphics yojson ppx_yojson_conv))

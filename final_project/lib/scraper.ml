@@ -1,4 +1,6 @@
 open Soup
+open Curl
+open Yojson.Basic.Util
 
 exception URL_Error of string
 
@@ -9,6 +11,7 @@ type d = {
   ophours : string list;
   description : string;
 }
+[@@deriving yojson_of]
 
 type m = {
   eatery : d;
@@ -16,6 +19,13 @@ type m = {
   hours : int list;
   menu_items : (string * string list) list;
 }
+[@@deriving yojson_of]
+
+let add_mto_file record =
+  yojson_of_d record |> Yojson.Safe.to_file "dining.json"
+
+let add_mto_file record =
+  yojson_of_m record |> Yojson.Safe.to_file "menu.json"
 
 (* This function was copied from:
    https://stackoverflow.com/questions/4621454/reading-html-contents-of-a-url-in-ocaml*)
@@ -62,7 +72,7 @@ let webpage =
 let active_eateries =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
-  |> parse $$ "a[hreflang]" |> to_list
+  |> parse $$ "a[hreflang]" |> Soup.to_list
   |> List.map (fun y ->
          match leaf_text y with
          | None -> ""
@@ -78,7 +88,7 @@ let active_eateries =
 let available_menu_types =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
-  |> parse $$ "summary" |> to_list
+  |> parse $$ "summary" |> Soup.to_list
   |> List.map (fun y ->
          match leaf_text y with
          | None -> ""
@@ -98,7 +108,7 @@ let available_menu_types =
 let available_stations =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
-  |> parse $$ "strong" |> to_list
+  |> parse $$ "strong" |> Soup.to_list
   |> List.map (fun y ->
          match leaf_text y with
          | None -> ""
