@@ -1,5 +1,4 @@
-(* open Soup *)
+open Final_project
+open Draw
 
-(* let _ = (string_of_uri "https://scl.cornell.edu/residential-life/dining/eateries-menus" |> parse |> texts |> List.map (fun x -> print_endline x)) *)
-
-
+let _ = window

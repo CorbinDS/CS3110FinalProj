@@ -1,8 +1,27 @@
 lib: [
-  "_build/install/default/lib/final_project/META"
-  "_build/install/default/lib/final_project/dune-package"
-  "_build/install/default/lib/final_project/opam"
+  "_build/install/default/lib/Final_project/META"
+  "_build/install/default/lib/Final_project/draw.ml"
+  "_build/install/default/lib/Final_project/draw.mli"
+  "_build/install/default/lib/Final_project/dune-package"
+  "_build/install/default/lib/Final_project/final_project.a"
+  "_build/install/default/lib/Final_project/final_project.cma"
+  "_build/install/default/lib/Final_project/final_project.cmi"
+  "_build/install/default/lib/Final_project/final_project.cmt"
+  "_build/install/default/lib/Final_project/final_project.cmx"
+  "_build/install/default/lib/Final_project/final_project.cmxa"
+  "_build/install/default/lib/Final_project/final_project.ml"
+  "_build/install/default/lib/Final_project/final_project__Draw.cmi"
+  "_build/install/default/lib/Final_project/final_project__Draw.cmt"
+  "_build/install/default/lib/Final_project/final_project__Draw.cmti"
+  "_build/install/default/lib/Final_project/final_project__Draw.cmx"
+  "_build/install/default/lib/Final_project/final_project__Scraper.cmi"
+  "_build/install/default/lib/Final_project/final_project__Scraper.cmt"
+  "_build/install/default/lib/Final_project/final_project__Scraper.cmti"
+  "_build/install/default/lib/Final_project/final_project__Scraper.cmx"
+  "_build/install/default/lib/Final_project/opam"
+  "_build/install/default/lib/Final_project/scraper.ml"
+  "_build/install/default/lib/Final_project/scraper.mli"
 ]
-bin: [
-  "_build/install/default/bin/final_project"
+libexec: [
+  "_build/install/default/lib/Final_project/final_project.cmxs"
 ]

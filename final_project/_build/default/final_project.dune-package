@@ -1,4 +1,64 @@
 (lang dune 3.0)
-(name final_project)
-(sections (lib .) (bin ../../bin))
-(files (lib (META dune-package opam)) (bin (final_project)))
+(name Final_project)
+(sections (lib .) (libexec .))
+(files
+ (lib
+  (META
+   draw.ml
+   draw.mli
+   dune-package
+   final_project.a
+   final_project.cma
+   final_project.cmi
+   final_project.cmt
+   final_project.cmx
+   final_project.cmxa
+   final_project.ml
+   final_project__Draw.cmi
+   final_project__Draw.cmt
+   final_project__Draw.cmti
+   final_project__Draw.cmx
+   final_project__Scraper.cmi
+   final_project__Scraper.cmt
+   final_project__Scraper.cmti
+   final_project__Scraper.cmx
+   opam
+   scraper.ml
+   scraper.mli))
+ (libexec (final_project.cmxs)))
+(library
+ (name Final_project)
+ (kind normal)
+ (archives (byte final_project.cma) (native final_project.cmxa))
+ (plugins (byte final_project.cma) (native final_project.cmxs))
+ (native_archives final_project.a)
+ (requires
+  lambdasoup
+  curl
+  graphics
+  yojson
+  ppx_yojson_conv
+  ppx_yojson_conv_lib)
+ (main_module_name Final_project)
+ (modes byte native)
+ (modules
+  (wrapped
+   (main_module_name Final_project)
+   (modules
+    ((name Draw)
+     (obj_name final_project__Draw)
+     (visibility public)
+     (impl)
+     (intf))
+    ((name Scraper)
+     (obj_name final_project__Scraper)
+     (visibility public)
+     (impl)
+     (intf)))
+   (alias_module
+    (name Final_project)
+    (obj_name final_project)
+    (visibility public)
+    (kind alias)
+    (impl))
+   (wrapped true))))

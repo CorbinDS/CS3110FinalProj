@@ -1,4 +1,5 @@
 (library
+ (public_name Final_project)
  (name final_project)
  (preprocess
   (pps ppx_yojson_conv))

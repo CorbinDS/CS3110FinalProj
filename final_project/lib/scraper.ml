@@ -21,10 +21,10 @@ type m = {
 }
 [@@deriving yojson_of]
 
-let add_mto_file record =
+let add_d_to_file record =
   yojson_of_d record |> Yojson.Safe.to_file "dining.json"
 
-let add_mto_file record =
+let add_m_to_file record =
   yojson_of_m record |> Yojson.Safe.to_file "menu.json"
 
 (* This function was copied from:
@@ -116,8 +116,8 @@ let available_stations =
   |> List.sort_uniq compare
 
 let rec separate_into_dining_halls
-    (web : 'a list)
-    (active_halls : 'a list) =
+    (web : string list)
+    (active_halls : string list) =
   match active_halls with
   | [] -> [ [] ]
   | [ t ] -> [ list_after_element web t true ]
@@ -197,7 +197,10 @@ let into_m_list hallinfo =
     (list_after_element hallinfo "Featuring/Menu" false)
     available_menu_types
 
-(** [from_net_nutrition s] is the dining locations and links from [s]
-    (http://netnutrition.dining.cornell.edu/NetNutrition/1).**)
-let from_net_nutrition (_s : string) =
+(** [from_net_nutrition] is the ingredients lists for the various items
+    on (http://netnutrition.dining.cornell.edu/NetNutrition/1).**)
+let from_net_nutrition =
   raise (Failure "from_net_nutrition unimplemented")
+
+let dining_halls = List.map into_d dininginfo
+let menus = List.map into_m_list dininginfo
