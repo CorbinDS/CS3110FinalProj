@@ -1,0 +1,49 @@
+Install OCaml Graphics:	opam install graphics
+
+OCaml Graphics on WSL:
+Install https://sourceforge.net/projects/vcxsrv/
+Run XLaunch, check all 3 boxes in the extra settings window
+Continue as default, press finish
+Tell windows firewall to allow access on both network types
+
+Launch Ubuntu
+type "export DISPLAY=:0"
+type "LIBGL_ALWAYS_INDIRECT=1"
+
+(If you want to skip these steps for future Ubuntu launches, you can edit bashrc with "nano ~/.bashrc" and add those two commands) 
+ 
+For Windows:
+	Libraries to install:
+		- selenium 
+		- geckodriver
+		- Python3
+
+For Macs:
+	Libraries to install: 
+		- Homebrew
+		- XQuartz
+		- XCode 
+		- geckodriver (use Homebrew)
+		- chromedriver (use Homebrew)
+		- Python3
+
+Run these commands in the terminal (for the other installations necessary for this:
+	Needed for OCaml Graphics: 
+		opam install graphics
+	Needed for HTML processing:
+		opam install ocurl
+		opam install lambdasoup
+
+	Needed in order to convert record types into Json values:
+		opam install ppx_yojson_conv
+		opam install yojson
+
+	Needed in order to scrape information off of the various websites. 
+		pip3 install splinter
+		pip3 install selenium
+
+
+Once all these packages are installed, one then cds into the second final_project folder that is within the first final_project folder. 
+Then, run: 
+dune build
+dune exec bin/main.exe
