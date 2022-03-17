@@ -12,6 +12,7 @@ type "LIBGL_ALWAYS_INDIRECT=1"
 
 (If you want to skip these steps for future Ubuntu launches, you can edit bashrc with "nano ~/.bashrc" and add those two commands) 
  
+Make sure to have Firefox and Chrome installed. 
 For Windows:
 	Libraries to install:
 		- selenium 
@@ -43,7 +44,7 @@ Run these commands in the terminal (for the other installations necessary for th
 		pip3 install selenium
 
 
-Once all these packages are installed, one then cds into the second final_project folder that is within the first final_project folder. 
-Then, run: 
+Once all these packages are installed, make sure you are in the lowest final_project folder: 
+cd final_project
 dune build
 dune exec bin/main.exe
