@@ -1,6 +1,6 @@
 description = ""
 requires =
-"curl graphics lambdasoup ppx_yojson_conv ppx_yojson_conv_lib yojson"
+"curl graphics lambdasoup lymp ppx_yojson_conv ppx_yojson_conv_lib yojson"
 archive(byte) = "final_project.cma"
 archive(native) = "final_project.cmxa"
 plugin(byte) = "final_project.cma"

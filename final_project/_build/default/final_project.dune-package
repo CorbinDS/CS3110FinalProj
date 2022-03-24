@@ -38,6 +38,7 @@
   graphics
   yojson
   ppx_yojson_conv
+  lymp
   ppx_yojson_conv_lib)
  (main_module_name Final_project)
  (modes byte native)

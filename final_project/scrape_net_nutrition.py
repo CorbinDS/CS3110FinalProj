@@ -4,17 +4,16 @@ import json
 
 from selenium.webdriver.firefox.options import Options
 
-options = Options()
-options.headless = True
-
 
 def wait(browser, tag):
     browser.is_element_not_present_by_tag(tag, wait_time=1)
 
 
 def update_net_nutrition():
-    browser = Browser(options=options)
+    options = Options()
+    options.headless = True
 
+    browser = Browser(options=options)
     browser.visit('https://netnutrition.dining.cornell.edu/NetNutrition/1')
 
     item_ingredient_list = {}

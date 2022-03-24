@@ -1,6 +1,7 @@
 open Soup
 open Curl
 open Yojson.Basic.Util
+open Lymp
 
 exception URL_Error of string
 
@@ -197,10 +198,12 @@ let into_m_list hallinfo =
     (list_after_element hallinfo "Featuring/Menu" false)
     available_menu_types
 
-(** [from_net_nutrition] is the ingredients lists for the various items
-    on (http://netnutrition.dining.cornell.edu/NetNutrition/1).**)
 let from_net_nutrition =
-  raise (Failure "from_net_nutrition unimplemented")
+  print_endline "Starting scraping. Wait for end print." |> fun () ->
+  get
+    (get_module (init ~exec:"python3" ".") "scrape_net_nutrition")
+    "update_net_nutrition" []
+  |> fun x -> print_endline "Finished scraping."
 
 let dining_halls = List.map into_d dininginfo
 let menus = List.map into_m_list dininginfo
