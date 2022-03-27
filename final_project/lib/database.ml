@@ -32,11 +32,9 @@ type i = {
   ingredients : ing;
 }
 
-let rec construct_int phrase sep =
-  match phrase with
-  | [] -> ""
-  | [ t ] -> string_of_int t
-  | h :: t -> string_of_int h ^ sep ^ construct_int t sep
+let rec in_time_range hour1 hour2 time =
+  if hour1 > hour2 then in_time_range hour1 (hour2 + 24) time
+  else hour1 <= time && time >= hour2
 
 let pretty_print_dining (dining : d) =
   "Name: " ^ dining.name ^ "\n" ^ "Location: " ^ dining.location ^ "\n"
@@ -325,13 +323,13 @@ type dining_hall_attributes =
   | Name of string
   | Campus_Location of string
   | Contact of string
-  | Open_During of int list list
+  | Open_During of (int * int) list
   | Description of string
 
 type menu_attributes =
   | Eatery of d
   | Name of string
-  | Open_During of int list
+  | Open_During of int * int
   | Item of string
 
 let filter_dining_hall
@@ -350,7 +348,7 @@ let filter_dining_hall
       List.filter
         (fun (x : d) -> if x.contact = c then true else false)
         dining_halls
-  | Open_During x -> dining_halls (* TODO *)
+  | Open_During hours -> dining_halls
   | Description des ->
       List.filter
         (fun (x : d) -> if x.description = des then true else false)
@@ -366,7 +364,17 @@ let filter_menus (attr : menu_attributes) (menus : m list) : m list =
       List.filter
         (fun x -> if x.menu_name = name then true else false)
         menus
-  | Open_During hours -> menus (* TODO *)
+  | Open_During (o, e) ->
+      List.filter
+        (fun (menu : m) ->
+          if
+            in_time_range (List.nth menu.hours 0)
+              (List.nth menu.hours 1) o
+            || in_time_range (List.nth menu.hours 0)
+                 (List.nth menu.hours 1) e
+          then true
+          else false)
+        menus
   | Item i ->
       List.filter
         (fun me ->
