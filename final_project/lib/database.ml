@@ -106,7 +106,7 @@ let list_between_elements lst beginning ending binc einc =
     (list_after_element lst beginning binc)
     ending einc
 
-let webpage =
+let webpage () =
   list_between_elements
     (string_of_uri
        "https://scl.cornell.edu/residential-life/dining/eateries-menus"
@@ -118,7 +118,7 @@ let webpage =
     Requires: All of the headings for eateries being displayed in
     https://scl.cornell.edu/residential-life/dining/eateries-menus need
     to be the only elements that are a[hreflang] elements. =*)
-let active_eateries =
+let active_eateries () =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
   |> parse $$ "a[hreflang]" |> Soup.to_list
@@ -134,7 +134,7 @@ let active_eateries =
     Requires: Only the available menu types should be stored in
     <summary> elements on the webpage
     https://scl.cornell.edu/residential-life/dining/eateries-menus *)
-let available_menu_types =
+let available_menu_types () =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
   |> parse $$ "summary" |> Soup.to_list
@@ -154,7 +154,7 @@ let available_menu_types =
  "Island Bar"; "Kosher Station"; "Mexican Station"; "Pasta and Pizza Station";
  "Pizza"; "Pizza Station"; "Salad Bar Station"; "Soup Station"; "Special";
  "Specialty Station"; "Vegan/Vegetarian Offerings"; "Wok"; "Wok/Asian Station"]*)
-let available_stations =
+let available_stations () =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
   |> parse $$ "strong" |> Soup.to_list
@@ -176,7 +176,8 @@ let rec separate_into_dining_halls
            (list_after_element web (List.hd t) true)
            t
 
-let dininginfo = separate_into_dining_halls webpage active_eateries
+let dininginfo () =
+  separate_into_dining_halls (webpage ()) (active_eateries ())
 
 (** [parse_time_range str] parses a string, in the format of the
     following examples, to an int. Examples: "12:30am - 1:00am" -> \[30;
@@ -246,7 +247,7 @@ let rec web_into_m_list_helper
 let web_into_m_list hallinfo =
   web_into_m_list_helper hallinfo (web_into_d hallinfo).ophours
     (list_after_element hallinfo "Featuring/Menu" false)
-    available_menu_types
+    (available_menu_types ())
 
 let update_nutritional_information () =
   print_endline "Starting scraping. Wait for end print." |> fun () ->
@@ -256,13 +257,13 @@ let update_nutritional_information () =
   |> fun x -> print_endline "Finished scraping."
 
 let update_dining_halls () =
-  List.map web_into_d dininginfo
+  List.map web_into_d (dininginfo ())
   |> List.map (fun x ->
          add_d_to_file x
            (String.map (fun c -> if c = ' ' then '_' else c) x.name))
 
 let update_menus () =
-  List.map web_into_m_list dininginfo
+  List.map web_into_m_list (dininginfo ())
   |> List.map (fun xs ->
          List.map
            (fun x ->
@@ -288,8 +289,11 @@ let load_dining_hall dining_hall_name =
     location = json |> member "location" |> to_string;
     contact = json |> member "contact" |> to_string;
     ophours =
-      json |> member "ophours" |> to_list
-      |> List.map (fun xs -> List.map (fun x -> to_int x) (to_list xs));
+      json |> member "ophours" |> Yojson.Basic.Util.to_list
+      |> List.map (fun xs ->
+             List.map
+               (fun x -> Yojson.Basic.Util.to_int x)
+               (Yojson.Basic.Util.to_list xs));
     description = json |> member "description" |> to_string;
   }
 
@@ -298,7 +302,7 @@ let load_station station =
   :: List.map to_string (to_list (List.nth station 1))
   |> fun list -> (List.hd list, List.tl list)
 
-let load_menu menu_type dining_hall_name =
+let load_menu dining_hall_name menu_type =
   Sys.chdir "database" |> fun () ->
   Sys.chdir "menus" |> fun () ->
   Yojson.Basic.from_file
@@ -313,9 +317,92 @@ let load_menu menu_type dining_hall_name =
     eatery = load_dining_hall dining_hall_name;
     menu_name = menu_type;
     hours =
-      json |> member "hours" |> to_list |> List.map (fun x -> to_int x);
+      json |> member "hours" |> Yojson.Basic.Util.to_list
+      |> List.map (fun x -> to_int x);
     menu_items =
-      json |> member "menu_items" |> to_list
-      |> List.map (fun x -> to_list x)
+      json |> member "menu_items" |> Yojson.Basic.Util.to_list
+      |> List.map (fun x -> Yojson.Basic.Util.to_list x)
       |> List.map (fun xs -> load_station xs);
   }
+
+type dining_hall_attributes =
+  | Name of string
+  | Campus_Location of string
+  | Contact of string
+  | Open_During of int list list
+  | Description of string
+
+type menu_attributes =
+  | Eatery of d
+  | Name of string
+  | Open_During of int list
+  | Item of string
+
+let filter_dining_hall
+    (attr : dining_hall_attributes)
+    (dining_halls : d list) : d list =
+  match attr with
+  | Name n ->
+      List.filter
+        (fun (x : d) -> if x.name = n then true else false)
+        dining_halls
+  | Campus_Location l ->
+      List.filter
+        (fun (x : d) -> if x.location = l then true else false)
+        dining_halls
+  | Contact c ->
+      List.filter
+        (fun (x : d) -> if x.contact = c then true else false)
+        dining_halls
+  | Open_During x -> dining_halls (* TODO *)
+  | Description des ->
+      List.filter
+        (fun (x : d) -> if x.description = des then true else false)
+        dining_halls
+
+let filter_menus (attr : menu_attributes) (menus : m list) : m list =
+  match attr with
+  | Eatery hall ->
+      List.filter
+        (fun x -> if x.eatery = hall then true else false)
+        menus
+  | Name name ->
+      List.filter
+        (fun x -> if x.menu_name = name then true else false)
+        menus
+  | Open_During hours -> menus (* TODO *)
+  | Item i ->
+      List.filter
+        (fun me ->
+          List.exists
+            (fun (station, items) -> List.mem i items)
+            me.menu_items)
+        menus
+
+let dining_halls = List.map load_dining_hall (active_eateries ())
+
+let menus =
+  Sys.chdir "database" |> fun () ->
+  Sys.readdir "menus" |> Array.to_list |> fun files ->
+  ( Sys.chdir "menus" |> fun () ->
+    List.map (fun file ->
+        Yojson.Basic.from_file file |> fun json ->
+        {
+          eatery =
+            ( Sys.chdir ".." |> fun () ->
+              Sys.chdir ".." |> fun () ->
+              json |> member "eatery" |> member "name" |> to_string
+              |> load_dining_hall
+              |> fun dine ->
+              (Sys.chdir "database" |> fun () -> dine) |> fun dine ->
+              Sys.chdir "menus" |> fun () -> dine );
+          menu_name = json |> member "menu_name" |> to_string;
+          hours =
+            json |> member "hours" |> Yojson.Basic.Util.to_list
+            |> List.map (fun x -> to_int x);
+          menu_items =
+            json |> member "menu_items" |> Yojson.Basic.Util.to_list
+            |> List.map (fun x -> Yojson.Basic.Util.to_list x)
+            |> List.map (fun xs -> load_station xs);
+        }) )
+    files
