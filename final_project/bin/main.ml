@@ -1,5 +1,8 @@
 open Final_project
 open Draw
-open Scraper
+open Database
 
-let _ = Scraper.from_net_nutrition |> fun () -> window ()
+let _ =
+  print_endline
+    (pretty_print_menu
+       (Database.load_menu "Lunch" "Jansen's Dining Room at Bethe House"))

@@ -1,6 +1,10 @@
+(** @canonical Final_project.Database *)
+module Database = Final_project__Database
+
+
 (** @canonical Final_project.Draw *)
 module Draw = Final_project__Draw
 
 
-(** @canonical Final_project.Scraper *)
-module Scraper = Final_project__Scraper
+(** @canonical Final_project.Filter *)
+module Filter = Final_project__Filter

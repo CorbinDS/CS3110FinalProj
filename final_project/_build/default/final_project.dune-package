@@ -4,9 +4,13 @@
 (files
  (lib
   (META
+   database.ml
+   database.mli
    draw.ml
    draw.mli
    dune-package
+   filter.ml
+   filter.mli
    final_project.a
    final_project.cma
    final_project.cmi
@@ -14,17 +18,19 @@
    final_project.cmx
    final_project.cmxa
    final_project.ml
+   final_project__Database.cmi
+   final_project__Database.cmt
+   final_project__Database.cmti
+   final_project__Database.cmx
    final_project__Draw.cmi
    final_project__Draw.cmt
    final_project__Draw.cmti
    final_project__Draw.cmx
-   final_project__Scraper.cmi
-   final_project__Scraper.cmt
-   final_project__Scraper.cmti
-   final_project__Scraper.cmx
-   opam
-   scraper.ml
-   scraper.mli))
+   final_project__Filter.cmi
+   final_project__Filter.cmt
+   final_project__Filter.cmti
+   final_project__Filter.cmx
+   opam))
  (libexec (final_project.cmxs)))
 (library
  (name Final_project)
@@ -46,13 +52,18 @@
   (wrapped
    (main_module_name Final_project)
    (modules
+    ((name Database)
+     (obj_name final_project__Database)
+     (visibility public)
+     (impl)
+     (intf))
     ((name Draw)
      (obj_name final_project__Draw)
      (visibility public)
      (impl)
      (intf))
-    ((name Scraper)
-     (obj_name final_project__Scraper)
+    ((name Filter)
+     (obj_name final_project__Filter)
      (visibility public)
      (impl)
      (intf)))
