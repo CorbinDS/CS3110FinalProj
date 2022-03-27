@@ -379,7 +379,28 @@ let filter_menus (attr : menu_attributes) (menus : m list) : m list =
             me.menu_items)
         menus
 
-let dining_halls = List.map load_dining_hall (active_eateries ())
+let dining_halls =
+  Sys.chdir "database" |> fun () ->
+  Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
+  ( Sys.chdir "dining_halls" |> fun () ->
+    List.map (fun file ->
+        Yojson.Basic.from_file file |> fun json ->
+        {
+          name = json |> member "name" |> to_string;
+          location = json |> member "location" |> to_string;
+          contact = json |> member "contact" |> to_string;
+          ophours =
+            json |> member "ophours" |> Yojson.Basic.Util.to_list
+            |> List.map (fun xs ->
+                   List.map
+                     (fun x -> Yojson.Basic.Util.to_int x)
+                     (Yojson.Basic.Util.to_list xs));
+          description = json |> member "description" |> to_string;
+        }) )
+    files
+  |> fun d ->
+  Sys.chdir ".." |> fun () ->
+  Sys.chdir ".." |> fun () -> d
 
 let menus =
   Sys.chdir "database" |> fun () ->
@@ -406,3 +427,6 @@ let menus =
             |> List.map (fun xs -> load_station xs);
         }) )
     files
+  |> fun m ->
+  Sys.chdir ".." |> fun () ->
+  Sys.chdir ".." |> fun () -> m
