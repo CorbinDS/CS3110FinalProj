@@ -289,11 +289,8 @@ let load_dining_hall dining_hall_name =
     location = json |> member "location" |> to_string;
     contact = json |> member "contact" |> to_string;
     ophours =
-      json |> member "ophours" |> Yojson.Basic.Util.to_list
-      |> List.map (fun xs ->
-             List.map
-               (fun x -> Yojson.Basic.Util.to_int x)
-               (Yojson.Basic.Util.to_list xs));
+      json |> member "ophours" |> to_list
+      |> List.map (fun xs -> List.map (fun x -> to_int x) (to_list xs));
     description = json |> member "description" |> to_string;
   }
 
@@ -317,11 +314,10 @@ let load_menu dining_hall_name menu_type =
     eatery = load_dining_hall dining_hall_name;
     menu_name = menu_type;
     hours =
-      json |> member "hours" |> Yojson.Basic.Util.to_list
-      |> List.map (fun x -> to_int x);
+      json |> member "hours" |> to_list |> List.map (fun x -> to_int x);
     menu_items =
-      json |> member "menu_items" |> Yojson.Basic.Util.to_list
-      |> List.map (fun x -> Yojson.Basic.Util.to_list x)
+      json |> member "menu_items" |> to_list
+      |> List.map (fun x -> to_list x)
       |> List.map (fun xs -> load_station xs);
   }
 
@@ -390,11 +386,9 @@ let dining_halls =
           location = json |> member "location" |> to_string;
           contact = json |> member "contact" |> to_string;
           ophours =
-            json |> member "ophours" |> Yojson.Basic.Util.to_list
+            json |> member "ophours" |> to_list
             |> List.map (fun xs ->
-                   List.map
-                     (fun x -> Yojson.Basic.Util.to_int x)
-                     (Yojson.Basic.Util.to_list xs));
+                   List.map (fun x -> to_int x) (to_list xs));
           description = json |> member "description" |> to_string;
         }) )
     files
@@ -419,11 +413,11 @@ let menus =
               Sys.chdir "menus" |> fun () -> dine );
           menu_name = json |> member "menu_name" |> to_string;
           hours =
-            json |> member "hours" |> Yojson.Basic.Util.to_list
+            json |> member "hours" |> to_list
             |> List.map (fun x -> to_int x);
           menu_items =
-            json |> member "menu_items" |> Yojson.Basic.Util.to_list
-            |> List.map (fun x -> Yojson.Basic.Util.to_list x)
+            json |> member "menu_items" |> to_list
+            |> List.map (fun x -> to_list x)
             |> List.map (fun xs -> load_station xs);
         }) )
     files
