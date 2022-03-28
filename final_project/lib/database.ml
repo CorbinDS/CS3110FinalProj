@@ -3,6 +3,7 @@ open Curl
 open Yojson.Basic.Util
 open Lymp
 open Sys
+open Utils
 
 exception URL_Error of string
 
@@ -32,9 +33,9 @@ type i = {
   ingredients : ing;
 }
 
-let rec in_time_range hour1 hour2 time =
-  if hour1 > hour2 then in_time_range hour1 (hour2 + 24) time
-  else hour1 <= time && time >= hour2
+let in_time_range hour1 hour2 time =
+  if hour1 > hour2 then hour1 <= time && time <= hour2 + 2400
+  else hour1 <= time && time <= hour2
 
 let pretty_print_dining (dining : d) =
   "Name: " ^ dining.name ^ "\n" ^ "Location: " ^ dining.location ^ "\n"
@@ -87,22 +88,6 @@ let string_of_uri uri =
     Curl.global_cleanup ();
     Buffer.contents write_buff
   with _ -> raise (URL_Error uri)
-
-let rec list_after_element lst element inc =
-  match lst with
-  | [] -> []
-  | h :: t ->
-      if h = element && inc = false then t
-      else if h = element && inc = true then h :: t
-      else list_after_element t element inc
-
-let rec list_before_element lst element inc =
-  list_after_element (List.rev lst) element inc |> List.rev
-
-let list_between_elements lst beginning ending binc einc =
-  list_before_element
-    (list_after_element lst beginning binc)
-    ending einc
 
 let webpage () =
   list_between_elements
@@ -218,6 +203,19 @@ let web_into_d hallinfo =
       List.hd (list_after_element hallinfo "Description" false);
   }
 
+let web_into_m
+    (hallinfo : string list)
+    (hours : int list list)
+    (hall_menu : string list) : m list =
+  [
+    {
+      eatery = web_into_d hallinfo;
+      menu_name = "Menu";
+      hours = (try List.hd hours with Failure x -> []);
+      menu_items = get_menu_items hall_menu;
+    };
+  ]
+
 let rec web_into_m_list_helper
     (hallinfo : string list)
     (hours : int list list)
@@ -243,9 +241,15 @@ let rec web_into_m_list_helper
       else web_into_m_list_helper hallinfo hours t menu_types
 
 let web_into_m_list hallinfo =
-  web_into_m_list_helper hallinfo (web_into_d hallinfo).ophours
-    (list_after_element hallinfo "Featuring/Menu" false)
-    (available_menu_types ())
+  if
+    List.length (list_after_element hallinfo "Featuring/Menu" false) = 1
+  then
+    web_into_m hallinfo (web_into_d hallinfo).ophours
+      (list_after_element hallinfo "Featuring/Menu" false)
+  else
+    web_into_m_list_helper hallinfo (web_into_d hallinfo).ophours
+      (list_after_element hallinfo "Featuring/Menu" false)
+      (available_menu_types ())
 
 let update_nutritional_information () =
   print_endline "Starting scraping. Wait for end print." |> fun () ->
@@ -255,12 +259,18 @@ let update_nutritional_information () =
   |> fun x -> print_endline "Finished scraping."
 
 let update_dining_halls () =
+  Sys.chdir "database" |> fun () ->
+  remove_contents "dining_halls" |> fun () ->
+  Sys.chdir ".." |> fun () ->
   List.map web_into_d (dininginfo ())
   |> List.map (fun x ->
          add_d_to_file x
            (String.map (fun c -> if c = ' ' then '_' else c) x.name))
 
 let update_menus () =
+  Sys.chdir "database" |> fun () ->
+  remove_contents "menus" |> fun () ->
+  Sys.chdir ".." |> fun () ->
   List.map web_into_m_list (dininginfo ())
   |> List.map (fun xs ->
          List.map
@@ -271,17 +281,12 @@ let update_menus () =
                   (x.menu_name ^ "_" ^ x.eatery.name)))
            xs)
 
-let load_dining_hall dining_hall_name =
-  Sys.chdir "database" |> fun () ->
-  Sys.chdir "dining_halls" |> fun () ->
-  Yojson.Basic.from_file
-    (String.map
-       (fun c -> if c = ' ' then '_' else c)
-       (dining_hall_name ^ ".json"))
-  |> fun json ->
-  ( Sys.chdir ".." |> fun () ->
-    Sys.chdir ".." |> fun () -> json )
-  |> fun json ->
+let load_station station =
+  to_string (List.hd station)
+  :: List.map to_string (to_list (List.nth station 1))
+  |> fun list -> (List.hd list, List.tl list)
+
+let dining_hall_from_json json =
   {
     name = json |> member "name" |> to_string;
     location = json |> member "location" |> to_string;
@@ -292,25 +297,10 @@ let load_dining_hall dining_hall_name =
     description = json |> member "description" |> to_string;
   }
 
-let load_station station =
-  to_string (List.hd station)
-  :: List.map to_string (to_list (List.nth station 1))
-  |> fun list -> (List.hd list, List.tl list)
-
-let load_menu dining_hall_name menu_type =
-  Sys.chdir "database" |> fun () ->
-  Sys.chdir "menus" |> fun () ->
-  Yojson.Basic.from_file
-    (String.map
-       (fun c -> if c = ' ' then '_' else c)
-       (menu_type ^ "_" ^ dining_hall_name ^ ".json"))
-  |> fun json ->
-  ( Sys.chdir ".." |> fun () ->
-    Sys.chdir ".." |> fun () -> json )
-  |> fun json ->
+let menu_from_json json =
   {
-    eatery = load_dining_hall dining_hall_name;
-    menu_name = menu_type;
+    eatery = json |> member "eatery" |> dining_hall_from_json;
+    menu_name = json |> member "menu_name" |> to_string;
     hours =
       json |> member "hours" |> to_list |> List.map (fun x -> to_int x);
     menu_items =
@@ -323,7 +313,7 @@ type dining_hall_attributes =
   | Name of string
   | Campus_Location of string
   | Contact of string
-  | Open_During of (int * int) list
+  | Open_During of int * int
   | Description of string
 
 type menu_attributes =
@@ -338,48 +328,78 @@ let filter_dining_hall
   match attr with
   | Name n ->
       List.filter
-        (fun (x : d) -> if x.name = n then true else false)
+        (fun (dining_hall : d) ->
+          contains
+            (String.lowercase_ascii dining_hall.name)
+            (String.lowercase_ascii n))
         dining_halls
   | Campus_Location l ->
       List.filter
-        (fun (x : d) -> if x.location = l then true else false)
+        (fun (dining_hall : d) ->
+          contains
+            (String.lowercase_ascii dining_hall.location)
+            (String.lowercase_ascii l))
         dining_halls
   | Contact c ->
       List.filter
-        (fun (x : d) -> if x.contact = c then true else false)
+        (fun (dining_hall : d) ->
+          if dining_hall.contact = c then true else false)
         dining_halls
-  | Open_During hours -> dining_halls
+  | Open_During (o, e) ->
+      List.filter
+        (fun (dining_hall : d) ->
+          List.exists
+            (fun hours ->
+              try
+                in_time_range (List.nth hours 0) (List.nth hours 1) o
+                || in_time_range (List.nth hours 0) (List.nth hours 1) e
+              with Failure x -> false)
+            dining_hall.ophours)
+        dining_halls
   | Description des ->
       List.filter
-        (fun (x : d) -> if x.description = des then true else false)
+        (fun (dining_hall : d) ->
+          contains
+            (String.lowercase_ascii dining_hall.description)
+            (String.lowercase_ascii des))
         dining_halls
 
 let filter_menus (attr : menu_attributes) (menus : m list) : m list =
   match attr with
   | Eatery hall ->
       List.filter
-        (fun x -> if x.eatery = hall then true else false)
+        (fun menu -> if menu.eatery = hall then true else false)
         menus
   | Name name ->
       List.filter
-        (fun x -> if x.menu_name = name then true else false)
+        (fun menu ->
+          if
+            String.lowercase_ascii menu.menu_name
+            = String.lowercase_ascii name
+          then true
+          else false)
         menus
   | Open_During (o, e) ->
       List.filter
         (fun (menu : m) ->
-          if
+          try
             in_time_range (List.nth menu.hours 0)
               (List.nth menu.hours 1) o
             || in_time_range (List.nth menu.hours 0)
                  (List.nth menu.hours 1) e
-          then true
-          else false)
+          with Failure x -> false)
         menus
   | Item i ->
       List.filter
         (fun me ->
           List.exists
-            (fun (station, items) -> List.mem i items)
+            (fun (station, items) ->
+              List.exists
+                (fun it ->
+                  contains
+                    (String.lowercase_ascii it)
+                    (String.lowercase_ascii i))
+                items)
             me.menu_items)
         menus
 
@@ -388,17 +408,7 @@ let dining_halls =
   Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
   ( Sys.chdir "dining_halls" |> fun () ->
     List.map (fun file ->
-        Yojson.Basic.from_file file |> fun json ->
-        {
-          name = json |> member "name" |> to_string;
-          location = json |> member "location" |> to_string;
-          contact = json |> member "contact" |> to_string;
-          ophours =
-            json |> member "ophours" |> to_list
-            |> List.map (fun xs ->
-                   List.map (fun x -> to_int x) (to_list xs));
-          description = json |> member "description" |> to_string;
-        }) )
+        Yojson.Basic.from_file file |> dining_hall_from_json) )
     files
   |> fun d ->
   Sys.chdir ".." |> fun () ->
@@ -408,26 +418,8 @@ let menus =
   Sys.chdir "database" |> fun () ->
   Sys.readdir "menus" |> Array.to_list |> fun files ->
   ( Sys.chdir "menus" |> fun () ->
-    List.map (fun file ->
-        Yojson.Basic.from_file file |> fun json ->
-        {
-          eatery =
-            ( Sys.chdir ".." |> fun () ->
-              Sys.chdir ".." |> fun () ->
-              json |> member "eatery" |> member "name" |> to_string
-              |> load_dining_hall
-              |> fun dine ->
-              (Sys.chdir "database" |> fun () -> dine) |> fun dine ->
-              Sys.chdir "menus" |> fun () -> dine );
-          menu_name = json |> member "menu_name" |> to_string;
-          hours =
-            json |> member "hours" |> to_list
-            |> List.map (fun x -> to_int x);
-          menu_items =
-            json |> member "menu_items" |> to_list
-            |> List.map (fun x -> to_list x)
-            |> List.map (fun xs -> load_station xs);
-        }) )
+    List.map (fun file -> Yojson.Basic.from_file file |> menu_from_json)
+  )
     files
   |> fun m ->
   Sys.chdir ".." |> fun () ->
