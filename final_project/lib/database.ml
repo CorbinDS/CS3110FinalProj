@@ -281,7 +281,7 @@ let update_menus () =
                   (x.menu_name ^ "_" ^ x.eatery.name)))
            xs)
 
-let load_station station =
+let menu_items_from_json station =
   to_string (List.hd station)
   :: List.map to_string (to_list (List.nth station 1))
   |> fun list -> (List.hd list, List.tl list)
@@ -306,7 +306,7 @@ let menu_from_json json =
     menu_items =
       json |> member "menu_items" |> to_list
       |> List.map (fun x -> to_list x)
-      |> List.map (fun xs -> load_station xs);
+      |> List.map (fun xs -> menu_items_from_json xs);
   }
 
 type dining_hall_attributes =
