@@ -37,10 +37,10 @@ type dining_hall_attributes =
   | Description of string
 
 type menu_attributes =
-  | Eatery of d
+  | Eatery of d list
   | Name of string
   | Open_During of int * int
   | Item of string
 
-val filter_dining_hall : dining_hall_attributes -> d list -> d list
+val filter_dining_halls : dining_hall_attributes -> d list -> d list
 val filter_menus : menu_attributes -> m list -> m list

@@ -317,12 +317,12 @@ type dining_hall_attributes =
   | Description of string
 
 type menu_attributes =
-  | Eatery of d
+  | Eatery of d list
   | Name of string
   | Open_During of int * int
   | Item of string
 
-let filter_dining_hall
+let filter_dining_halls
     (attr : dining_hall_attributes)
     (dining_halls : d list) : d list =
   match attr with
@@ -366,9 +366,9 @@ let filter_dining_hall
 
 let filter_menus (attr : menu_attributes) (menus : m list) : m list =
   match attr with
-  | Eatery hall ->
+  | Eatery halls ->
       List.filter
-        (fun menu -> if menu.eatery = hall then true else false)
+        (fun menu -> List.exists (fun hall -> hall = menu.eatery) halls)
         menus
   | Name name ->
       List.filter
