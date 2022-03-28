@@ -1,0 +1,71 @@
+{
+  "eatery": {
+    "name": "Jansen's Dining Room at Bethe House",
+    "location": "Hans Bethe House",
+    "contact": "607-255-1736",
+    "ophours": [
+      [
+        700,
+        1030
+      ],
+      [
+        1030,
+        1400
+      ],
+      [
+        1630,
+        1930
+      ]
+    ],
+    "description": "Dining room located in Hans Bethe House on West Campus."
+  },
+  "menu_name": "Breakfast",
+  "hours": [
+    700,
+    1030
+  ],
+  "menu_items": [
+    [
+      "Cereal/Bagel Bar",
+      [
+        "Bagels & Baked Goods",
+        "Assorted Cereal",
+        "Oatmeal with Brown Sugar & Raisins"
+      ]
+    ],
+    [
+      "Hot Traditional Station - Entrees",
+      [
+        "Home Fries",
+        "Scrambled Tofu",
+        "Hard Boiled Eggs",
+        "Scrambled Eggs",
+        "Strata",
+        "Pork Breakfast Sausage"
+      ]
+    ],
+    [
+      "Grill Station",
+      [
+        "Steamed Broccoli Spears",
+        "French Toast with Syrup"
+      ]
+    ],
+    [
+      "Specialty Station",
+      [
+        "Fresh Fruit Salad",
+        "Fresh Whole Fruit",
+        "Cornell Dairy Yogurt",
+        "Mini Cinnamon Twist",
+        "Allergy Friendly Items"
+      ]
+    ],
+    [
+      "Beverage Station",
+      [
+        "Hot & Cold Beverage Service"
+      ]
+    ]
+  ]
+}

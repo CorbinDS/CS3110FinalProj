@@ -6,5 +6,5 @@ module Database = Final_project__Database
 module Draw = Final_project__Draw
 
 
-(** @canonical Final_project.Filter *)
-module Filter = Final_project__Filter
+(** @canonical Final_project.Utils *)
+module Utils = Final_project__Utils

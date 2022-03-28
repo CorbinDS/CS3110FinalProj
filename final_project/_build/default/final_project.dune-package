@@ -9,8 +9,6 @@
    draw.ml
    draw.mli
    dune-package
-   filter.ml
-   filter.mli
    final_project.a
    final_project.cma
    final_project.cmi
@@ -26,11 +24,13 @@
    final_project__Draw.cmt
    final_project__Draw.cmti
    final_project__Draw.cmx
-   final_project__Filter.cmi
-   final_project__Filter.cmt
-   final_project__Filter.cmti
-   final_project__Filter.cmx
-   opam))
+   final_project__Utils.cmi
+   final_project__Utils.cmt
+   final_project__Utils.cmti
+   final_project__Utils.cmx
+   opam
+   utils.ml
+   utils.mli))
  (libexec (final_project.cmxs)))
 (library
  (name Final_project)
@@ -45,6 +45,7 @@
   yojson
   ppx_yojson_conv
   lymp
+  Str
   ppx_yojson_conv_lib)
  (main_module_name Final_project)
  (modes byte native)
@@ -62,8 +63,8 @@
      (visibility public)
      (impl)
      (intf))
-    ((name Filter)
-     (obj_name final_project__Filter)
+    ((name Utils)
+     (obj_name final_project__Utils)
      (visibility public)
      (impl)
      (intf)))
