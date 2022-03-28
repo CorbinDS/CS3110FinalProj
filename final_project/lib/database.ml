@@ -60,20 +60,20 @@ let pretty_print_menu (menu : m) =
   ^ ")" ^ "}"
 
 let add_d_to_file record file =
-  Sys.chdir "database" |> fun () ->
-  Sys.chdir "dining_halls" |> fun () ->
-  close_out (open_out (file ^ ".json")) |> fun () ->
-  yojson_of_d record |> Yojson.Safe.to_file (file ^ ".json")
-  |> fun () ->
-  Sys.chdir ".." |> fun () -> Sys.chdir ".."
+  Sys.chdir "database";
+  Sys.chdir "dining_halls";
+  close_out (open_out (file ^ ".json"));
+  yojson_of_d record |> Yojson.Safe.to_file (file ^ ".json");
+  Sys.chdir "..";
+  Sys.chdir ".."
 
 let add_m_to_file record file =
-  Sys.chdir "database" |> fun () ->
-  Sys.chdir "menus" |> fun () ->
-  close_out (open_out (file ^ ".json")) |> fun () ->
-  yojson_of_m record |> Yojson.Safe.to_file (file ^ ".json")
-  |> fun () ->
-  Sys.chdir ".." |> fun () -> Sys.chdir ".."
+  Sys.chdir "database";
+  Sys.chdir "menus";
+  close_out (open_out (file ^ ".json"));
+  yojson_of_m record |> Yojson.Safe.to_file (file ^ ".json");
+  Sys.chdir "..";
+  Sys.chdir ".."
 
 (* This function was copied from:
    https://stackoverflow.com/questions/4621454/reading-html-contents-of-a-url-in-ocaml*)
@@ -259,18 +259,18 @@ let update_nutritional_information () =
   |> fun x -> print_endline "Finished scraping."
 
 let update_dining_halls () =
-  Sys.chdir "database" |> fun () ->
-  remove_contents "dining_halls" |> fun () ->
-  Sys.chdir ".." |> fun () ->
+  Sys.chdir "database";
+  remove_contents "dining_halls";
+  Sys.chdir "..";
   List.map web_into_d (dininginfo ())
   |> List.map (fun x ->
          add_d_to_file x
            (String.map (fun c -> if c = ' ' then '_' else c) x.name))
 
 let update_menus () =
-  Sys.chdir "database" |> fun () ->
-  remove_contents "menus" |> fun () ->
-  Sys.chdir ".." |> fun () ->
+  Sys.chdir "database";
+  remove_contents "menus";
+  Sys.chdir "..";
   List.map web_into_m_list (dininginfo ())
   |> List.map (fun xs ->
          List.map
@@ -317,7 +317,7 @@ type dining_hall_attributes =
   | Description of string
 
 type menu_attributes =
-  | Eatery of d list
+  | Eateries of d list
   | Name of string
   | Open_During of int * int
   | Item of string
@@ -366,7 +366,7 @@ let filter_dining_halls
 
 let filter_menus (attr : menu_attributes) (menus : m list) : m list =
   match attr with
-  | Eatery halls ->
+  | Eateries halls ->
       List.filter
         (fun menu -> List.exists (fun hall -> hall = menu.eatery) halls)
         menus
@@ -404,23 +404,24 @@ let filter_menus (attr : menu_attributes) (menus : m list) : m list =
         menus
 
 let dining_halls =
-  Sys.chdir "database" |> fun () ->
+  Sys.chdir "database";
   Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
-  ( Sys.chdir "dining_halls" |> fun () ->
-    List.map (fun file ->
-        Yojson.Basic.from_file file |> dining_hall_from_json) )
+  (Sys.chdir "dining_halls";
+   List.map (fun file ->
+       Yojson.Basic.from_file file |> dining_hall_from_json))
     files
   |> fun d ->
-  Sys.chdir ".." |> fun () ->
-  Sys.chdir ".." |> fun () -> d
+  Sys.chdir "..";
+  Sys.chdir "..";
+  d
 
 let menus =
-  Sys.chdir "database" |> fun () ->
+  Sys.chdir "database";
   Sys.readdir "menus" |> Array.to_list |> fun files ->
-  ( Sys.chdir "menus" |> fun () ->
-    List.map (fun file -> Yojson.Basic.from_file file |> menu_from_json)
-  )
+  (Sys.chdir "menus";
+   List.map (fun file -> Yojson.Basic.from_file file |> menu_from_json))
     files
   |> fun m ->
-  Sys.chdir ".." |> fun () ->
-  Sys.chdir ".." |> fun () -> m
+  Sys.chdir "..";
+  Sys.chdir "..";
+  m
