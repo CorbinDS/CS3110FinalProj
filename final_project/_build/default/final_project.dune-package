@@ -24,10 +24,16 @@
    final_project__Draw.cmt
    final_project__Draw.cmti
    final_project__Draw.cmx
+   final_project__Graphics.cmi
+   final_project__Graphics.cmt
+   final_project__Graphics.cmti
+   final_project__Graphics.cmx
    final_project__Utils.cmi
    final_project__Utils.cmt
    final_project__Utils.cmti
    final_project__Utils.cmx
+   graphics.ml
+   graphics.mli
    opam
    utils.ml
    utils.mli))
@@ -46,6 +52,7 @@
   ppx_yojson_conv
   lymp
   Str
+  bogue
   ppx_yojson_conv_lib)
  (main_module_name Final_project)
  (modes byte native)
@@ -60,6 +67,11 @@
      (intf))
     ((name Draw)
      (obj_name final_project__Draw)
+     (visibility public)
+     (impl)
+     (intf))
+    ((name Graphics)
+     (obj_name final_project__Graphics)
      (visibility public)
      (impl)
      (intf))

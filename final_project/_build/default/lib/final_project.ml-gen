@@ -6,5 +6,9 @@ module Database = Final_project__Database
 module Draw = Final_project__Draw
 
 
+(** @canonical Final_project.Graphics *)
+module Graphics = Final_project__Graphics
+
+
 (** @canonical Final_project.Utils *)
 module Utils = Final_project__Utils
