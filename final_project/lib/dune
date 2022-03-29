@@ -3,4 +3,4 @@
  (name final_project)
  (preprocess
   (pps ppx_yojson_conv))
- (libraries lambdasoup curl graphics yojson ppx_yojson_conv lymp Str bogue))
+ (libraries lambdasoup curl graphics yojson ppx_yojson_conv lymp str bogue))

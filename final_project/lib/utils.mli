@@ -6,3 +6,4 @@ val list_between_elements :
   'a list -> 'a -> 'a -> bool -> bool -> 'a list
 
 val remove_contents : string -> unit
+val times : string array

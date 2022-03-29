@@ -6,8 +6,6 @@
   (META
    database.ml
    database.mli
-   draw.ml
-   draw.mli
    dune-package
    final_project.a
    final_project.cma
@@ -20,10 +18,6 @@
    final_project__Database.cmt
    final_project__Database.cmti
    final_project__Database.cmx
-   final_project__Draw.cmi
-   final_project__Draw.cmt
-   final_project__Draw.cmti
-   final_project__Draw.cmx
    final_project__Graphics.cmi
    final_project__Graphics.cmt
    final_project__Graphics.cmti
@@ -51,7 +45,7 @@
   yojson
   ppx_yojson_conv
   lymp
-  Str
+  str
   bogue
   ppx_yojson_conv_lib)
  (main_module_name Final_project)
@@ -62,11 +56,6 @@
    (modules
     ((name Database)
      (obj_name final_project__Database)
-     (visibility public)
-     (impl)
-     (intf))
-    ((name Draw)
-     (obj_name final_project__Draw)
      (visibility public)
      (impl)
      (intf))
