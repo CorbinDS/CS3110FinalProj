@@ -61,7 +61,7 @@ def update_net_nutrition():
             browser.find_by_tag(
                 'a[onclick="NetNutrition.UI.menuDetailBackBtn()"]').click()
 
-    with open('net_nutrition.json', 'w') as json_file:
+    with open('database/net_nutrition.json', 'w') as json_file:
         json.dump(item_ingredient_list, json_file)
 
     browser.quit()

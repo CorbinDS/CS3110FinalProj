@@ -37,7 +37,7 @@ type dining_hall_attributes =
   | Description of string
 
 type menu_attributes =
-  | Eatery of d list
+  | Eateries of d list
   | Name of string
   | Open_During of int * int
   | Item of string
