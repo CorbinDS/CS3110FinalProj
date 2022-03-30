@@ -39,12 +39,25 @@ let dining_layout =
         ];
     ]
 
+type open_t = {
+  mutable open_h : string;
+  mutable close_h : string;
+}
+
+let time_store = { open_h = "  "; close_h = "  " }
+let store_open index = time_store.open_h <- times.(index)
+let store_closed index = time_store.close_h <- times.(index)
 let menu_filter_box = W.box ~style:box_style ~h:550 ~w:275 ()
 let menu_name_input = W.text_input ~prompt:"Name" ()
 let menu_item_input = W.text_input ~prompt:"Item" ()
-let menu_open_hour_input = Select.create times 0
-let menu_closed_hour_input = Select.create times 0
-let menu_filter = W.check_box ()
+
+let menu_open_hour_input =
+  Select.create ?action:(Some store_open) times 0
+
+let menu_closed_hour_input =
+  Select.create ?action:(Some store_closed) times 0
+
+let menu_filter = W.button "Filter"
 
 let menu_filter_layout =
   L.tower
@@ -65,7 +78,8 @@ let menu_filter_layout =
                   menu_closed_hour_input;
                 ];
               dining_layout;
-              L.flat_of_w [ W.label "   Show: "; menu_filter ];
+              L.flat_of_w
+                [ W.label "                           "; menu_filter ];
             ];
           L.flat_of_w [ menu_filter_box ];
         ];
@@ -89,12 +103,36 @@ let menu_display_layout =
         ];
     ]
 
+let all_dining_inputs () : dining_hall_attributes list =
+  [
+    (if W.get_text dining_name_input = "" then Nothing
+    else Name (W.get_text dining_name_input));
+    (if W.get_text dining_location_input = "" then Nothing
+    else Campus_Location (W.get_text dining_location_input));
+    (if W.get_text dining_contact_input = "" then Nothing
+    else Contact (W.get_text dining_contact_input));
+    (if W.get_text dining_description_input = "" then Nothing
+    else Description (W.get_text dining_description_input));
+    (if time_store.open_h = "  " && time_store.close_h = "  " then
+     Nothing
+    else
+      Open_During
+        ( int_of_string time_store.open_h,
+          int_of_string time_store.close_h ));
+  ]
+
 let all_menu_inputs () : menu_attributes list =
   [
     (if W.get_text menu_name_input = "" then Nothing
     else Name (W.get_text menu_name_input));
     (if W.get_text menu_item_input = "" then Nothing
     else Item (W.get_text menu_item_input));
+    (if time_store.open_h = "  " && time_store.close_h = "  " then
+     Nothing
+    else
+      Open_During
+        ( int_of_string time_store.open_h,
+          int_of_string time_store.close_h ));
   ]
 
 let action ti l _ =
