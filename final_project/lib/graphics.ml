@@ -117,8 +117,7 @@ let all_dining_inputs () : dining_hall_attributes list =
      Nothing
     else
       Open_During
-        ( int_of_string time_store.open_h,
-          int_of_string time_store.close_h ));
+        (parse_time time_store.open_h, parse_time time_store.close_h));
   ]
 
 let all_menu_inputs () : menu_attributes list =
@@ -131,8 +130,8 @@ let all_menu_inputs () : menu_attributes list =
      Nothing
     else
       Open_During
-        ( int_of_string time_store.open_h,
-          int_of_string time_store.close_h ));
+        (parse_time time_store.open_h, parse_time time_store.close_h));
+    Eateries (filter_dining_halls (all_dining_inputs ()) dining_halls);
   ]
 
 let action ti l _ =

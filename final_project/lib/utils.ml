@@ -1,5 +1,12 @@
 open Str
 
+let parse_time str =
+  Scanf.sscanf (String.trim str) "%d:%d%c%c" (fun h m t1 t2 ->
+      if t1 = 'a' && h = 12 then 0 + m
+      else if t1 = 'a' then (100 * h) + m
+      else if t1 = 'p' && h = 12 then 1200 + m
+      else (100 * h) + m + 1200)
+
 let hours =
   [ "12"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "10"; "11" ]
 
