@@ -49,15 +49,14 @@ let pretty_print_dining (dining : d) =
 
 let pretty_print_menu (menu : m) =
   pretty_print_dining menu.eatery
-  ^ "\n" ^ "Menu Name: " ^ menu.menu_name ^ "\n" ^ "Hours: {"
+  ^ "\n\n" ^ "Menu Name: " ^ menu.menu_name ^ "\n" ^ "Hours: "
   ^ String.concat ", " (List.map string_of_int menu.hours)
-  ^ "}\n" ^ "Menu Items: {"
+  ^ "\n" ^ "Menu Items: "
   ^ String.concat ", "
       (List.map
          (fun (station, items) ->
-           "(" ^ station ^ ": " ^ String.concat ", " items ^ ")")
+           "\n(" ^ station ^ ": " ^ String.concat ", " items ^ ")")
          menu.menu_items)
-  ^ ")" ^ "}"
 
 let add_d_to_file record file =
   Sys.chdir "database";
@@ -310,6 +309,7 @@ let menu_from_json json =
   }
 
 type dining_hall_attributes =
+  | Nothing
   | Name of string
   | Campus_Location of string
   | Contact of string
@@ -317,91 +317,109 @@ type dining_hall_attributes =
   | Description of string
 
 type menu_attributes =
+  | Nothing
   | Eateries of d list
   | Name of string
   | Open_During of int * int
   | Item of string
 
-let filter_dining_halls
-    (attr : dining_hall_attributes)
-    (dining_halls : d list) : d list =
+let rec filter_dining_halls
+    (attr : dining_hall_attributes list)
+    (ds : d list) : d list =
   match attr with
-  | Name n ->
-      List.filter
-        (fun (dining_hall : d) ->
-          contains
-            (String.lowercase_ascii dining_hall.name)
-            (String.lowercase_ascii n))
-        dining_halls
-  | Campus_Location l ->
-      List.filter
-        (fun (dining_hall : d) ->
-          contains
-            (String.lowercase_ascii dining_hall.location)
-            (String.lowercase_ascii l))
-        dining_halls
-  | Contact c ->
-      List.filter
-        (fun (dining_hall : d) ->
-          if dining_hall.contact = c then true else false)
-        dining_halls
-  | Open_During (o, e) ->
-      List.filter
-        (fun (dining_hall : d) ->
-          List.exists
-            (fun hours ->
-              try
-                in_time_range (List.nth hours 0) (List.nth hours 1) o
-                || in_time_range (List.nth hours 0) (List.nth hours 1) e
-              with Failure x -> false)
-            dining_hall.ophours)
-        dining_halls
-  | Description des ->
-      List.filter
-        (fun (dining_hall : d) ->
-          contains
-            (String.lowercase_ascii dining_hall.description)
-            (String.lowercase_ascii des))
-        dining_halls
+  | [] -> ds
+  | Nothing :: t -> filter_dining_halls t ds
+  | Name n :: t ->
+      filter_dining_halls t
+        (List.filter
+           (fun (dining_hall : d) ->
+             contains
+               (String.lowercase_ascii dining_hall.name)
+               (String.lowercase_ascii n))
+           ds)
+  | Campus_Location l :: t ->
+      filter_dining_halls t
+        (List.filter
+           (fun (dining_hall : d) ->
+             contains
+               (String.lowercase_ascii dining_hall.location)
+               (String.lowercase_ascii l))
+           ds)
+  | Contact c :: t ->
+      filter_dining_halls t
+        (List.filter
+           (fun (dining_hall : d) ->
+             if dining_hall.contact = c then true else false)
+           ds)
+  | Open_During (o, e) :: t ->
+      filter_dining_halls t
+        (List.filter
+           (fun (dining_hall : d) ->
+             List.exists
+               (fun hours ->
+                 try
+                   in_time_range (List.nth hours 0) (List.nth hours 1) o
+                   || in_time_range (List.nth hours 0)
+                        (List.nth hours 1) e
+                 with Failure x -> false)
+               dining_hall.ophours)
+           ds)
+  | Description des :: t ->
+      filter_dining_halls t
+        (List.filter
+           (fun (dining_hall : d) ->
+             contains
+               (String.lowercase_ascii dining_hall.description)
+               (String.lowercase_ascii des))
+           ds)
 
-let filter_menus (attr : menu_attributes) (menus : m list) : m list =
+let rec filter_menus (attr : menu_attributes list) (ms : m list) :
+    m list =
   match attr with
-  | Eateries halls ->
-      List.filter
-        (fun menu -> List.exists (fun hall -> hall = menu.eatery) halls)
-        menus
-  | Name name ->
-      List.filter
-        (fun menu ->
-          if
-            String.lowercase_ascii menu.menu_name
-            = String.lowercase_ascii name
-          then true
-          else false)
-        menus
-  | Open_During (o, e) ->
-      List.filter
-        (fun (menu : m) ->
-          try
-            in_time_range (List.nth menu.hours 0)
-              (List.nth menu.hours 1) o
-            || in_time_range (List.nth menu.hours 0)
-                 (List.nth menu.hours 1) e
-          with Failure x -> false)
-        menus
-  | Item i ->
-      List.filter
-        (fun me ->
-          List.exists
-            (fun (station, items) ->
-              List.exists
-                (fun it ->
-                  contains
-                    (String.lowercase_ascii it)
-                    (String.lowercase_ascii i))
-                items)
-            me.menu_items)
-        menus
+  | [] -> ms
+  | Nothing :: t -> filter_menus t ms
+  | Eateries halls :: t ->
+      filter_menus t
+        (List.filter
+           (fun menu ->
+             List.exists (fun hall -> hall = menu.eatery) halls)
+           ms)
+  | Name name :: t ->
+      filter_menus t
+        (List.filter
+           (fun menu ->
+             if
+               String.lowercase_ascii menu.menu_name
+               = String.lowercase_ascii name
+             then true
+             else false)
+           ms)
+  | Open_During (o, e) :: t ->
+      filter_menus t
+        (List.filter
+           (fun (menu : m) ->
+             try
+               in_time_range (List.nth menu.hours 0)
+                 (List.nth menu.hours 1) o
+               || in_time_range (List.nth menu.hours 0)
+                    (List.nth menu.hours 1) e
+             with Failure x -> false)
+           ms)
+  | Item i :: t ->
+      filter_menus t
+        (List.filter
+           (fun me ->
+             List.exists
+               (fun (station, items) ->
+                 List.exists
+                   (fun it ->
+                     contains
+                       (String.lowercase_ascii it)
+                       (String.lowercase_ascii i))
+                   items)
+               me.menu_items
+             && List.length me.menu_items >= 1)
+           ms)
 
 let dining_halls =
   Sys.chdir "database";

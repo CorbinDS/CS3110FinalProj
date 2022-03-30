@@ -30,6 +30,7 @@ val pretty_print_menu : m -> string
 (** [pretty_print_menu m] creates a string of menu [m]. *)
 
 type dining_hall_attributes =
+  | Nothing
   | Name of string
   | Campus_Location of string
   | Contact of string
@@ -37,10 +38,13 @@ type dining_hall_attributes =
   | Description of string
 
 type menu_attributes =
+  | Nothing
   | Eateries of d list
   | Name of string
   | Open_During of int * int
   | Item of string
 
-val filter_dining_halls : dining_hall_attributes -> d list -> d list
-val filter_menus : menu_attributes -> m list -> m list
+val filter_dining_halls :
+  dining_hall_attributes list -> d list -> d list
+
+val filter_menus : menu_attributes list -> m list -> m list
