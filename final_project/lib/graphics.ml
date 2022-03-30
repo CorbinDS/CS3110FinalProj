@@ -11,7 +11,7 @@ let box_style =
   let border = mk_border ~radius:5 thick_grey_line in
   create ~border ()
 
-let menu_placeholder = L.empty ~h:0 ~w:800 ()
+let menu_placeholder = L.empty ~w:700 ~h:0 ()
 let dining_box = W.box ~style:box_style ~h:250 ~w:225 ()
 let dining_name_input = W.text_input ~prompt:"Name" ()
 let dining_location_input = W.text_input ~prompt:"Location" ()
@@ -76,10 +76,28 @@ let menu_filter_layout =
         ];
     ]
 
-let layout =
-  L.tower ~margins:0
-    ~background:(L.color_bg Draw.(lighter (opaque pale_grey)))
-    [ menu_filter_layout ]
+let menu_display_box = W.box ~style:box_style ()
+let menu_display = W.text_display "Menu will be displayed here. "
 
-let board = Bogue.make [] [ layout ]
+let menu_display_layout =
+  L.tower
+    [
+      L.empty ~h:0 ~w:0 ();
+      L.superpose
+        [
+          L.resident menu_display_box;
+          L.empty ~h:0 ~w:0 ();
+          L.resident menu_display;
+        ];
+    ]
+
+let action ti l _ =
+  let text = W.get_text ti in
+  W.set_text l ("Hello " ^ text ^ "!")
+
+let c =
+  W.connect menu_name_input menu_display action Trigger.[ key_down ]
+
+let layout = L.flat [ menu_filter_layout; menu_display_layout ]
+let board = Bogue.make [ c ] [ layout ]
 let main () = Bogue.run board
