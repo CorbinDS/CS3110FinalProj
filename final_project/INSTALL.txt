@@ -1,4 +1,10 @@
-Install OCaml Graphics:	opam install graphics
+For Windows, you will be using WSL. You need the following libraries:
+	Libraries to install:
+		- selenium 
+		- geckodriver
+		- Python3
+		- bogue (the installation instructions are specified below.)
+
 
 Bogue on WSL:
 Install https://sourceforge.net/projects/vcxsrv/
@@ -36,14 +42,15 @@ will probably crash. If you get any XDG or SDL errors, make sure your XLaunch
 server is running. 
 
 Make sure to have Firefox and Chrome installed. 
-For Windows:
-	Libraries to install:
-		- selenium 
-		- geckodriver
-		- Python3
-		- bogue
 
 For Macs:
+	Run the command:
+	brew uninstall --ignore-dependencies sdl2
+
+	Then cd into the final project folder called final_project. 
+	Once there, run the command: 
+	brew install ./sdl2.rb
+
 	Libraries to install: 
 		- Homebrew
 		- XQuartz
@@ -51,10 +58,21 @@ For Macs:
 		- geckodriver (use Homebrew)
 		- chromedriver (use Homebrew)
 		- Python3
+	
 
-Run these commands in the terminal (for the other installations necessary for this:
+Run these commands in (in the listed order) on the terminal (for the other installations necessary for this) for both operating systems:
+	Needed in order to scrape information off of the various websites. 
+		pip3 install splinter
+		pip3 install selenium
+		pip3 install pymongo
+	
+	Needed for to run Python scripts through OCaml: 
+		opam install lymp
+
 	Needed for Bogue: 
 		opam install graphics
+		opam install bogue
+
 	Needed for HTML processing:
 		opam install ocurl
 		opam install lambdasoup
@@ -63,9 +81,6 @@ Run these commands in the terminal (for the other installations necessary for th
 		opam install ppx_yojson_conv
 		opam install yojson
 
-	Needed in order to scrape information off of the various websites. 
-		pip3 install splinter
-		pip3 install selenium
 
 
 Once all these packages are installed, make sure you are in the lowest final_project folder: 
