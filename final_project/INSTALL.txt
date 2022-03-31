@@ -1,23 +1,47 @@
 Install OCaml Graphics:	opam install graphics
 
-OCaml Graphics on WSL:
+Bogue on WSL:
 Install https://sourceforge.net/projects/vcxsrv/
-Run XLaunch, check all 3 boxes in the extra settings window
-Continue as default, press finish
-Tell windows firewall to allow access on both network types
+Run XLaunch, choose "One Window" as your display setting.
+Make sure the Display Number field has 0 in it. 
+Start no client, select the No Access Control checkbox. 
+check all 3 boxes in the extra settings window. Press finish, tell windows
+firewall to allow access on both network types
+
 
 Launch Ubuntu
 type "export DISPLAY=:0"
-type "LIBGL_ALWAYS_INDIRECT=1"
+type "export LC_ALL=C"
+type "export SDL_VIDEO_X11_VISUALID="
+(If you want to skip these steps for future Ubuntu launches, 
+you can edit bashrc with "nano ~/.bashrc" and add those two commands) 
 
-(If you want to skip these steps for future Ubuntu launches, you can edit bashrc with "nano ~/.bashrc" and add those two commands) 
- 
+Important: For Bogue to work, you need SDL 2.0.18. To get this, go to 
+https://www.libsdl.org/release/
+and download the file named "SDL2-2.0.18.tar.gz". Bring this file into your WSL
+and run these commands 
+- tar xvzf SDL2-2.0.18.tar.gz
+- tar xvjf SDL2-2.0.18.tar.bz2
+- cd SDL2-2.0.18
+- ./configure
+- make
+- sudo make install
+
+Now you are free to - opam install bogue
+
+To test Bogue and XMing, type boguex 34. 
+When the command first comes in, it should say "INFO: Using SDL 2.0.18"
+if not then something went wrong with your installation of SDL, and the example 
+will probably crash. If you get any XDG or SDL errors, make sure your XLaunch 
+server is running. 
+
 Make sure to have Firefox and Chrome installed. 
 For Windows:
 	Libraries to install:
 		- selenium 
 		- geckodriver
 		- Python3
+		- bogue
 
 For Macs:
 	Libraries to install: 
@@ -29,7 +53,7 @@ For Macs:
 		- Python3
 
 Run these commands in the terminal (for the other installations necessary for this:
-	Needed for OCaml Graphics: 
+	Needed for Bogue: 
 		opam install graphics
 	Needed for HTML processing:
 		opam install ocurl
