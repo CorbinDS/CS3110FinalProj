@@ -51,6 +51,9 @@ For Macs:
 	Once there, run the command: 
 	brew install ./sdl2.rb
 
+	Use the command below to make sure that you are running sdl2-2.0.18
+	brew info sdl2 
+
 	Libraries to install: 
 		- Homebrew
 		- XQuartz
