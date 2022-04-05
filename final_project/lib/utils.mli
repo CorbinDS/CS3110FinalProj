@@ -8,3 +8,6 @@ val list_between_elements :
 val remove_contents : string -> unit
 val times : string array
 val parse_time : string -> int
+val index_of : 'a -> 'a list -> int
+val return_next_element : 'a -> 'a list -> 'a
+val return_prev_element : 'a -> 'a list -> 'a

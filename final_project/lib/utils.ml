@@ -85,3 +85,20 @@ let rec remove_contents path =
       |> Array.iter (fun name ->
              remove_contents (Filename.concat path name))
   | false -> Sys.remove path
+
+let index_of e l =
+  let rec index_rec i = function
+    | [] -> -1
+    | hd :: tl -> if hd = e then i else index_rec (i + 1) tl
+  in
+  index_rec 0 l
+
+let return_next_element e lst =
+  List.nth lst
+    (if index_of e lst + 1 >= List.length lst then 0
+    else index_of e lst + 1)
+
+let return_prev_element e lst =
+  List.nth lst
+    (if index_of e lst - 1 < 0 then List.length lst - 1
+    else index_of e lst - 1)

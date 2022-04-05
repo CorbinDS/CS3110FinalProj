@@ -310,7 +310,7 @@ let menu_from_json json =
 
 type dining_hall_attributes =
   | Nothing
-  | Name of string
+  | Dining_Name of string
   | Campus_Location of string
   | Contact of string
   | Open_During of int * int
@@ -319,7 +319,7 @@ type dining_hall_attributes =
 type menu_attributes =
   | Nothing
   | Eateries of d list
-  | Name of string
+  | Menu_Name of string
   | Open_During of int * int
   | Item of string
 
@@ -329,7 +329,7 @@ let rec filter_dining_halls
   match attr with
   | [] -> ds
   | Nothing :: t -> filter_dining_halls t ds
-  | Name n :: t ->
+  | Dining_Name n :: t ->
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
@@ -384,7 +384,7 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
            (fun menu ->
              List.exists (fun hall -> hall = menu.eatery) halls)
            ms)
-  | Name name :: t ->
+  | Menu_Name name :: t ->
       filter_menus t
         (List.filter
            (fun menu ->
@@ -443,3 +443,22 @@ let menus =
   Sys.chdir "..";
   Sys.chdir "..";
   m
+
+let menu_identifier (menu : m) =
+  menu.menu_name ^ ": " ^ menu.eatery.name
+
+let get_menu_from_identifier idt =
+  List.hd
+    (filter_menus
+       [
+         Menu_Name (List.hd (String.split_on_char ':' idt));
+         Eateries
+           (filter_dining_halls
+              [
+                Dining_Name
+                  (String.trim
+                     (List.nth (String.split_on_char ':' idt) 1));
+              ]
+              dining_halls);
+       ]
+       menus)
