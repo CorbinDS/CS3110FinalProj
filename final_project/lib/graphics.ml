@@ -188,15 +188,6 @@ let possible_menus_action ti l _ =
        with Failure x -> "Nothing.")
   else W.set_text l ""
 
-let menu_display_action ti l _ =
-  if W.get_state show_selected_menus then
-    W.set_text l
-      (try
-         pretty_print_menu
-           (get_menu_from_identifier (W.get_text selected_menu))
-       with Failure x -> "Nothing.")
-  else W.set_text l ""
-
 let change_selected_menu_next ti l _ =
   if W.get_state menu_selector_next then
     W.set_text l
@@ -215,16 +206,26 @@ let change_selected_menu_back ti l _ =
             (filter_menus (all_menu_inputs ()) menus)))
   else ()
 
+let menu_display_action ti l _ =
+  if W.get_state show_selected_menus then
+    W.set_text l
+      (try
+         pretty_print_menu
+           (get_menu_from_identifier (W.get_text selected_menu))
+       with Failure x -> "Nothing.")
+  else W.set_text l ""
+
+(* Connections *)
+let show_filtered =
+  W.connect possible_menus_button filtered_menus possible_menus_action
+    Trigger.buttons_down
+
 let select_menu_to_display_next =
   W.connect menu_selector_next selected_menu change_selected_menu_next
     Trigger.buttons_down
 
 let select_menu_to_display_back =
   W.connect menu_selector_back selected_menu change_selected_menu_back
-    Trigger.buttons_down
-
-let show_filtered =
-  W.connect possible_menus_button filtered_menus possible_menus_action
     Trigger.buttons_down
 
 let show_selected =

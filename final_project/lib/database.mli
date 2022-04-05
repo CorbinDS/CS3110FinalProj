@@ -46,7 +46,17 @@ type menu_attributes =
 
 val filter_dining_halls :
   dining_hall_attributes list -> d list -> d list
+(** [filter_dining_halls attrs dining_halls] returns a list of dining
+    halls filtered by the attributes provided. *)
 
 val filter_menus : menu_attributes list -> m list -> m list
+(** [filter_menus attrs dining_halls] returns a list of menus filtered
+    by the attributes provided. *)
+
 val menu_identifier : m -> string
+(** [menu_identifier menu] creates a unique identifier for the menu m,
+    using the menu name and the name of the dining hall.*)
+
 val get_menu_from_identifier : string -> m
+(** [get_menu_from_identifier idt] returns the menu used to make the
+    menu identifier.*)
