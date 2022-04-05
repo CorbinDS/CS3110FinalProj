@@ -144,6 +144,7 @@ let menu_display_layout =
         ];
     ]
 
+(* Filtering dining halls and menus *)
 let all_dining_inputs () : dining_hall_attributes list =
   [
     (if W.get_text dining_name_input = "" then Nothing
@@ -176,7 +177,6 @@ let all_menu_inputs () : menu_attributes list =
   ]
 
 (* Actions *)
-
 let possible_menus_action ti l _ =
   if W.get_state possible_menus_button then
     W.set_text l
