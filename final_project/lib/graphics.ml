@@ -88,6 +88,31 @@ let menu_filter_layout =
 let menu_display_box = W.box ~style:box_style ~h:550 ~w:300 ()
 let menu_display_label = W.label "Menu will be displayed here: "
 let menu_display = W.text_display ~h:500 ~w:250 ""
+let filtered_display_box = W.box ~style:box_style ~h:550 ~w:300 ()
+
+let filtered_display_label =
+  W.label "All menus that match the filters: "
+
+let filtered_menus = Radiolist.vertical (Array.of_list [])
+
+let filtered_menus_layout =
+  L.tower
+    [
+      L.superpose
+        [
+          L.tower
+            [
+              L.flat_of_w [ filtered_display_label ];
+              L.flat
+                [
+                  L.resident (W.label "   ");
+                  Radiolist.layout filtered_menus;
+                ];
+            ];
+          L.flat_of_w [ W.label "        " ];
+          L.flat_of_w [ filtered_display_box ];
+        ];
+    ]
 
 let menu_display_layout =
   L.tower
@@ -149,7 +174,10 @@ let layout =
   L.tower
     [
       menu_placeholder;
-      L.flat [ menu_filter_layout; menu_display_layout ];
+      L.flat
+        [
+          menu_filter_layout; filtered_menus_layout; menu_display_layout;
+        ];
     ]
 
 let board = Bogue.make [ c ] [ layout ]
