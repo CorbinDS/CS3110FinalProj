@@ -33,6 +33,8 @@ type i = {
   ingredients : ing;
 }
 
+(* TODO: for cross-midnight hours, split into before-midnight and
+   after-midnight. For after-midnight hours, keep the same. *)
 let in_time_range hour1 hour2 time =
   if hour1 > hour2 then hour1 <= time && time <= hour2 + 2400
   else hour1 <= time && time <= hour2
