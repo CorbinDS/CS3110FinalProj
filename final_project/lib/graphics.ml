@@ -114,11 +114,15 @@ let filtered_menus_layout =
             [
               L.flat_of_w [ filtered_display_label ];
               L.empty ~h:0 ~w:0 ();
-              L.make_clip 200 (L.flat_of_w [ filtered_menus ]);
+              L.make_clip 350 (L.flat_of_w [ filtered_menus ]);
               L.flat_of_w [ W.label "Selected: " ];
               L.flat_of_w [ selected_menu ];
-              L.flat_of_w [ menu_selector_back; menu_selector_next ];
-              L.flat_of_w [ show_selected_menus ];
+              L.flat_of_w
+                [
+                  menu_selector_back;
+                  menu_selector_next;
+                  show_selected_menus;
+                ];
             ];
           L.flat_of_w [ W.label "        " ];
           L.flat_of_w [ filtered_display_box ];

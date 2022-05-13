@@ -39,23 +39,23 @@ let in_time_range hour1 hour2 time =
 
 let pretty_print_dining (dining : d) =
   "Name: " ^ dining.name ^ "\n" ^ "Location: " ^ dining.location ^ "\n"
-  ^ "Contact: " ^ dining.contact ^ "\n" ^ "Operating Hours: {"
+  ^ "Contact: " ^ dining.contact ^ "\n" ^ "Operating Hours: "
   ^ String.concat ", "
       (List.map
-         (fun s ->
-           "{" ^ String.concat ", " (List.map string_of_int s) ^ "}")
+         (fun s -> String.concat "-" (List.map string_of_int s))
          dining.ophours)
-  ^ "}\n" ^ "Description: " ^ dining.description
+  ^ "\n" ^ "Description: " ^ dining.description
 
 let pretty_print_menu (menu : m) =
   pretty_print_dining menu.eatery
   ^ "\n\n" ^ "Menu Name: " ^ menu.menu_name ^ "\n" ^ "Hours: "
-  ^ String.concat ", " (List.map string_of_int menu.hours)
-  ^ "\n" ^ "Menu Items: "
-  ^ String.concat ", "
+  ^ String.concat "-" (List.map string_of_int menu.hours)
+  ^ "\n" ^ "Menu Items: \n"
+  ^ String.concat "\n"
       (List.map
          (fun (station, items) ->
-           "\n(" ^ station ^ ": " ^ String.concat ", " items ^ ")")
+           if station = "" then String.concat ", " items
+           else station ^ ": " ^ String.concat ", " items)
          menu.menu_items)
 
 let add_d_to_file record file =
