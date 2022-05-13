@@ -99,7 +99,7 @@ let webpage () =
 (** [active eateries] is a list of active eateries for the current day.
     Requires: All of the headings for eateries being displayed in
     https://scl.cornell.edu/residential-life/dining/eateries-menus need
-    to be the only elements that are a[hreflang] elements. =*)
+    to be the only elements that are a[hreflang] elements. *)
 let active_eateries () =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
