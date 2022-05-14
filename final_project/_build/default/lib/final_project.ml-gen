@@ -1,0 +1,10 @@
+(** @canonical Final_project.Database *)
+module Database = Final_project__Database
+
+
+(** @canonical Final_project.Graphics *)
+module Graphics = Final_project__Graphics
+
+
+(** @canonical Final_project.Utils *)
+module Utils = Final_project__Utils

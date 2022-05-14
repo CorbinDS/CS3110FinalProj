@@ -1,0 +1,78 @@
+(lang dune 3.0)
+(name Final_project)
+(sections (lib .) (libexec .))
+(files
+ (lib
+  (META
+   database.ml
+   database.mli
+   dune-package
+   final_project.a
+   final_project.cma
+   final_project.cmi
+   final_project.cmt
+   final_project.cmx
+   final_project.cmxa
+   final_project.ml
+   final_project__Database.cmi
+   final_project__Database.cmt
+   final_project__Database.cmti
+   final_project__Database.cmx
+   final_project__Graphics.cmi
+   final_project__Graphics.cmt
+   final_project__Graphics.cmti
+   final_project__Graphics.cmx
+   final_project__Utils.cmi
+   final_project__Utils.cmt
+   final_project__Utils.cmti
+   final_project__Utils.cmx
+   graphics.ml
+   graphics.mli
+   opam
+   utils.ml
+   utils.mli))
+ (libexec (final_project.cmxs)))
+(library
+ (name Final_project)
+ (kind normal)
+ (archives (byte final_project.cma) (native final_project.cmxa))
+ (plugins (byte final_project.cma) (native final_project.cmxs))
+ (native_archives final_project.a)
+ (requires
+  lambdasoup
+  curl
+  graphics
+  yojson
+  ppx_yojson_conv
+  lymp
+  str
+  bogue
+  ppx_yojson_conv_lib)
+ (main_module_name Final_project)
+ (modes byte native)
+ (modules
+  (wrapped
+   (main_module_name Final_project)
+   (modules
+    ((name Database)
+     (obj_name final_project__Database)
+     (visibility public)
+     (impl)
+     (intf))
+    ((name Graphics)
+     (obj_name final_project__Graphics)
+     (visibility public)
+     (impl)
+     (intf))
+    ((name Utils)
+     (obj_name final_project__Utils)
+     (visibility public)
+     (impl)
+     (intf)))
+   (alias_module
+    (name Final_project)
+    (obj_name final_project)
+    (visibility public)
+    (kind alias)
+    (impl))
+   (wrapped true))))
