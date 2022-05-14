@@ -12,4 +12,6 @@ let auto_update_menus () =
   let same_day = Utils.is_same_day modification_time current_time in
   if same_day = true then () else update_menus () |> fun x -> ()
 
-let _ = Graphics.main ()
+let _ =
+  update_menus ();
+  Graphics.main ()

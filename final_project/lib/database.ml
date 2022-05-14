@@ -36,7 +36,8 @@ type i = {
 (* TODO: for cross-midnight hours, split into before-midnight and
    after-midnight. For after-midnight hours, keep the same. *)
 let in_time_range hour1 hour2 time =
-  if hour1 > hour2 then hour1 <= time && time <= hour2 + 2400
+  if hour1 > hour2 then
+    (hour1 <= time && time <= 2359) || (0 <= time && time <= hour2)
   else hour1 <= time && time <= hour2
 
 let pretty_print_dining (dining : d) =
@@ -206,13 +207,13 @@ let web_into_d hallinfo =
 
 let web_into_m
     (hallinfo : string list)
-    (hours : int list list)
+    (hours_t : int list list)
     (hall_menu : string list) : m list =
   [
     {
       eatery = web_into_d hallinfo;
       menu_name = "Menu";
-      hours = (try List.hd hours with Failure x -> []);
+      hours = (try List.hd hours_t with Failure x -> []);
       menu_items = get_menu_items hall_menu;
     };
   ]
