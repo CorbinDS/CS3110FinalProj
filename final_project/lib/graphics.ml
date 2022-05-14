@@ -261,19 +261,19 @@ let update_dining_halls_action w =
 (* Connections *)
 let show_filtered =
   W.connect possible_menus_button filtered_menus possible_menus_action
-    Trigger.buttons_down
+    Trigger.buttons_up
 
 let select_menu_to_display_next =
   W.connect menu_selector_next selected_menu change_selected_menu_next
-    Trigger.buttons_down
+    (Trigger.buttons_up @ Trigger.buttons_down)
 
 let select_menu_to_display_back =
   W.connect menu_selector_back selected_menu change_selected_menu_back
-    Trigger.buttons_down
+    (Trigger.buttons_up @ Trigger.buttons_down)
 
 let show_selected =
   W.connect show_selected_menus menu_display menu_display_action
-    Trigger.buttons_down
+    Trigger.buttons_up
 
 let update_menus_connection =
   W.on_release update_menus_action update_menus_button
