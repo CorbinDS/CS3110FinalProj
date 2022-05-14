@@ -21,5 +21,9 @@ clean:
 	ocamlbuild -clean
 	rm -f final_project.zip
 
+lines: 
+	ocamlbuild -clean
+	cloc --by-file --include-lang=OCaml .
+	
 doc:
 	dune build @doc
