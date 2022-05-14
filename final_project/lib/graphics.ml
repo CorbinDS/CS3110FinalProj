@@ -52,7 +52,7 @@ type open_t = {
 let time_store = { open_h = "  "; close_h = "  " }
 let store_open index = time_store.open_h <- times.(index)
 let store_closed index = time_store.close_h <- times.(index)
-let menu_filter_box = W.box ~style:box_style ~h:550 ~w:275 ()
+let menu_filter_box = W.box ~style:box_style ~h:600 ~w:275 ()
 let menu_name_input = W.text_input ~prompt:"Name" ()
 let menu_item_input = W.text_input ~prompt:"Item" ()
 
@@ -82,10 +82,17 @@ let menu_filter_layout =
                   L.resident (W.label " to ");
                   menu_closed_hour_input;
                 ];
+              L.flat_of_w
+                [
+                  W.label
+                    "   Check if menu is available at any point in \
+                     this time range"
+                    ~size:10;
+                ];
               dining_layout;
               L.flat_of_w
                 [
-                  W.label "                           ";
+                  W.label "                         ";
                   possible_menus_button;
                 ];
             ];
@@ -94,12 +101,12 @@ let menu_filter_layout =
     ]
 
 (* Filtered menus box *)
-let filtered_display_box = W.box ~style:box_style ~h:550 ~w:300 ()
+let filtered_display_box = W.box ~style:box_style ~h:600 ~w:300 ()
 
 let filtered_display_label =
   W.label "All menus that match the filters: "
 
-let filtered_menus = W.text_display "" ~h:500 ~w:250
+let filtered_menus = W.text_display "" ~h:2000 ~w:250
 let selected_menu = W.text_display "" ~h:30 ~w:250
 let menu_selector_next = W.button "Next"
 let menu_selector_back = W.button "Back"
@@ -130,9 +137,9 @@ let filtered_menus_layout =
     ]
 
 (* Selected menu display box *)
-let menu_display_box = W.box ~style:box_style ~h:550 ~w:300 ()
+let menu_display_box = W.box ~style:box_style ~h:600 ~w:300 ()
 let menu_display_label = W.label "Menu will be displayed here: "
-let menu_display = W.text_display ~h:500 ~w:250 ""
+let menu_display = W.text_display ~h:2000 ~w:250 ""
 
 let menu_display_layout =
   L.tower
@@ -142,7 +149,7 @@ let menu_display_layout =
           L.tower ~sep:1
             [
               L.flat_of_w [ menu_display_label ];
-              L.make_clip 500 (L.flat_of_w [ menu_display ]);
+              L.make_clip 550 (L.flat_of_w [ menu_display ]);
             ];
           L.flat_of_w [ menu_display_box ];
         ];
