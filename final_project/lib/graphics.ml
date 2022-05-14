@@ -14,7 +14,7 @@ let box_style =
   create ~border ()
 
 (* Filtering box *)
-let menu_placeholder = L.empty ~w:600 ~h:0 ()
+let menu_placeholder = L.empty ~w:650 ~h:0 ()
 
 (* Dining box *)
 let dining_box = W.box ~style:box_style ~h:250 ~w:225 ()
@@ -52,9 +52,10 @@ type open_t = {
 let time_store = { open_h = "  "; close_h = "  " }
 let store_open index = time_store.open_h <- times.(index)
 let store_closed index = time_store.close_h <- times.(index)
-let menu_filter_box = W.box ~style:box_style ~h:600 ~w:275 ()
+let menu_filter_box = W.box ~style:box_style ~h:650 ~w:275 ()
 let menu_name_input = W.text_input ~prompt:"Name" ()
 let menu_item_input = W.text_input ~prompt:"Item" ()
+let menu_avoid_input = W.text_input ~prompt:"Items to avoid" ()
 
 let menu_open_hour_input =
   Select.create ?action:(Some store_open) times 0
@@ -75,6 +76,8 @@ let menu_filter_layout =
               L.empty ~h:0 ~w:0 ();
               L.flat_of_w [ W.label "   Name: "; menu_name_input ];
               L.flat_of_w [ W.label "   Item: "; menu_item_input ];
+              L.flat_of_w
+                [ W.label "   Items to avoid: "; menu_avoid_input ];
               L.flat
                 [
                   L.resident (W.label "   Hours: ");
@@ -101,7 +104,7 @@ let menu_filter_layout =
     ]
 
 (* Filtered menus box *)
-let filtered_display_box = W.box ~style:box_style ~h:600 ~w:300 ()
+let filtered_display_box = W.box ~style:box_style ~h:550 ~w:300 ()
 
 let filtered_display_label =
   W.label "All menus that match the filters: "
@@ -136,8 +139,27 @@ let filtered_menus_layout =
         ];
     ]
 
+(* Update menus and dining halls box*)
+let update_box = W.box ~style:box_style ~h:47 ~w:300 ()
+let update_menus_button = W.button "Update Menus"
+let update_dining_halls_button = W.button "Update Dining Hall Info."
+
+let update_box_layout =
+  L.tower
+    [
+      L.superpose
+        [
+          L.tower ~sep:1
+            [
+              L.flat_of_w
+                [ update_menus_button; update_dining_halls_button ];
+            ];
+          L.flat_of_w [ update_box ];
+        ];
+    ]
+
 (* Selected menu display box *)
-let menu_display_box = W.box ~style:box_style ~h:600 ~w:300 ()
+let menu_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
 let menu_display_label = W.label "Menu will be displayed here: "
 let menu_display = W.text_display ~h:2000 ~w:250 ""
 
@@ -149,7 +171,7 @@ let menu_display_layout =
           L.tower ~sep:1
             [
               L.flat_of_w [ menu_display_label ];
-              L.make_clip 550 (L.flat_of_w [ menu_display ]);
+              L.make_clip 400 (L.flat_of_w [ menu_display ]);
             ];
           L.flat_of_w [ menu_display_box ];
         ];
@@ -227,6 +249,15 @@ let menu_display_action ti l _ =
        with Failure x -> "Nothing.")
   else W.set_text l ""
 
+let update_menus_action w =
+  if W.get_state update_menus_button then update_menus () |> fun x -> ()
+  else ()
+
+let update_dining_halls_action w =
+  if W.get_state update_dining_halls_button then
+    update_dining_halls () |> fun x -> ()
+  else ()
+
 (* Connections *)
 let show_filtered =
   W.connect possible_menus_button filtered_menus possible_menus_action
@@ -244,13 +275,21 @@ let show_selected =
   W.connect show_selected_menus menu_display menu_display_action
     Trigger.buttons_down
 
+let update_menus_connection =
+  W.on_release update_menus_action update_menus_button
+
+let update_dining_halls_connection =
+  W.on_release update_dining_halls_action update_dining_halls_button
+
 let layout =
   L.tower
     [
       menu_placeholder;
       L.flat
         [
-          menu_filter_layout; filtered_menus_layout; menu_display_layout;
+          menu_filter_layout;
+          L.tower [ filtered_menus_layout; update_box_layout ];
+          menu_display_layout;
         ];
     ]
 

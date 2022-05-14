@@ -43,6 +43,7 @@ type menu_attributes =
   | Menu_Name of string
   | Open_During of int * int
   | Item of string
+  | Avoid of string
 
 val filter_dining_halls :
   dining_hall_attributes list -> d list -> d list

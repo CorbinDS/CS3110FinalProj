@@ -12,12 +12,14 @@ let auto_update_menus () =
   in
   let current_time = Unix.time () |> Unix.localtime in
   let same_day = Utils.is_same_day modification_time current_time in
-  if same_day = true then ()
-  else
-    update_menus () |> fun x ->
-    ();
+  if same_day = true then (
     Sys.chdir "..";
-    Sys.chdir ".."
+    Sys.chdir "..")
+  else
+    (Sys.chdir "..";
+     Sys.chdir "..")
+    |> update_menus
+    |> fun x -> ()
 
 let _ =
   auto_update_menus ();

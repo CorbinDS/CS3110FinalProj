@@ -270,9 +270,11 @@ let update_dining_halls () =
            (String.map (fun c -> if c = ' ' then '_' else c) x.name))
 
 let update_menus () =
+  print_endline (Sys.getcwd ());
   Sys.chdir "database";
   remove_contents "menus";
   Sys.chdir "..";
+  print_endline (Sys.getcwd ());
   List.map web_into_m_list (dininginfo ())
   |> List.map (fun xs ->
          List.map
@@ -325,6 +327,7 @@ type menu_attributes =
   | Menu_Name of string
   | Open_During of int * int
   | Item of string
+  | Avoid of string
 
 let rec filter_dining_halls
     (attr : dining_hall_attributes list)
@@ -421,6 +424,22 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
                        (String.lowercase_ascii i))
                    items)
                me.menu_items
+             && List.length me.menu_items >= 1)
+           ms)
+  | Avoid i :: t ->
+      filter_menus t
+        (List.filter
+           (fun me ->
+             List.exists
+               (fun (station, items) ->
+                 List.exists
+                   (fun it ->
+                     contains
+                       (String.lowercase_ascii it)
+                       (String.lowercase_ascii i))
+                   items)
+               me.menu_items
+             = false
              && List.length me.menu_items >= 1)
            ms)
 
