@@ -189,14 +189,15 @@ let all_menu_inputs () : menu_attributes list =
 
 (* Actions *)
 let possible_menus_action ti l _ =
-  if W.get_state possible_menus_button then
+  if W.get_state possible_menus_button then (
     W.set_text l
       (try
          String.concat ""
            (List.map
               (fun m -> Database.menu_identifier m ^ "\n")
               (filter_menus (all_menu_inputs ()) menus))
-       with Failure x -> "Nothing.")
+       with Failure x -> "Nothing.");
+    W.set_text selected_menu "")
   else W.set_text l ""
 
 let change_selected_menu_next ti l _ =
