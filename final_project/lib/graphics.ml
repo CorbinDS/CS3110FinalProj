@@ -186,10 +186,48 @@ let calendar_list =
   :: (List.map (fun x -> [ "Today"; x; "" ]) today_times
      @ List.map (fun x -> [ "Tomorrow"; x; "" ]) tomorrow_times)
 
+let day_col =
+  let day =
+    Array.of_list
+      (List.map (fun x -> "Today") today_times
+      @ List.map (fun x -> "Tomorrow") tomorrow_times)
+  in
+  Table.
+    {
+      title = "Day";
+      length = Array.length times - 1;
+      rows = (fun i -> L.resident (W.label day.(i)));
+      compare = None;
+      width = Some 75;
+    }
+
+let time_col =
+  let time_list = Array.of_list (List.tl (Array.to_list times)) in
+  Table.
+    {
+      title = "Time";
+      length = Array.length times - 1;
+      rows = (fun i -> L.resident (W.label time_list.(i)));
+      compare = None;
+      width = Some 100;
+    }
+
+let menu_col =
+  let menu_list =
+    Array.of_list
+      (List.map (fun x -> "") (List.tl (Array.to_list times)))
+  in
+  Table.
+    {
+      title = "Menu";
+      length = Array.length times - 1;
+      rows = (fun i -> L.resident (W.label menu_list.(i)));
+      compare = None;
+      width = Some 150;
+    }
+
 let calendar_display, _ =
-  Table.of_list ~h:575
-    ~widths:[ Some 75; Some 100; Some 150 ]
-    calendar_list
+  Table.create ~h:575 [ day_col; time_col; menu_col ]
 
 let calendar_display_layout =
   L.tower
