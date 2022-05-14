@@ -200,7 +200,9 @@ let all_menu_inputs () : menu_attributes list =
     (if W.get_text menu_name_input = "" then Nothing
     else Menu_Name (W.get_text menu_name_input));
     (if W.get_text menu_item_input = "" then Nothing
-    else Item (W.get_text menu_item_input));
+    else Item (W.get_text menu_avoid_input));
+    (if W.get_text menu_item_input = "" then Nothing
+    else Avoid (W.get_text menu_avoid_input));
     (if time_store.open_h = "  " && time_store.close_h = "  " then
      Nothing
     else
@@ -220,7 +222,7 @@ let possible_menus_action ti l _ =
               (filter_menus (all_menu_inputs ()) menus))
        with Failure x -> "Nothing.");
     W.set_text selected_menu "")
-  else W.set_text l ""
+  else ()
 
 let change_selected_menu_next ti l _ =
   if W.get_state menu_selector_next then
@@ -247,7 +249,7 @@ let menu_display_action ti l _ =
          pretty_print_menu
            (get_menu_from_identifier (W.get_text selected_menu))
        with Failure x -> "Nothing.")
-  else W.set_text l ""
+  else ()
 
 let update_menus_action w =
   if W.get_state update_menus_button then update_menus () |> fun x -> ()
@@ -261,7 +263,7 @@ let update_dining_halls_action w =
 (* Connections *)
 let show_filtered =
   W.connect possible_menus_button filtered_menus possible_menus_action
-    Trigger.buttons_up
+    (Trigger.buttons_up @ Trigger.buttons_down)
 
 let select_menu_to_display_next =
   W.connect menu_selector_next selected_menu change_selected_menu_next
@@ -273,7 +275,7 @@ let select_menu_to_display_back =
 
 let show_selected =
   W.connect show_selected_menus menu_display menu_display_action
-    Trigger.buttons_up
+    (Trigger.buttons_up @ Trigger.buttons_down)
 
 let update_menus_connection =
   W.on_release update_menus_action update_menus_button

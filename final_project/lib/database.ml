@@ -51,9 +51,9 @@ let pretty_print_dining (dining : d) =
 
 let pretty_print_menu (menu : m) =
   pretty_print_dining menu.eatery
-  ^ "\n\n" ^ "Menu Name: " ^ menu.menu_name ^ "\n" ^ "Hours: "
+  ^ "\n\n" ^ menu.menu_name ^ "\n" ^ "Hours: "
   ^ String.concat "-" (List.map string_of_int menu.hours)
-  ^ "\n" ^ "Menu Items: \n"
+  ^ "\n\n" ^ "Items: \n"
   ^ String.concat "\n"
       (List.map
          (fun (station, items) ->
