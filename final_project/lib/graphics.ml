@@ -178,15 +178,29 @@ let menu_display_layout =
     ]
 
 (* Calendar display *)
-let calendar_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
+let calendar_display_box = W.box ~style:box_style ~h:650 ~w:375 ()
 let calendar_display_label = W.label "Today's Calendar: "
+
+let calendar_list =
+  [ "Day"; "Time"; "Menu" ]
+  :: (List.map (fun x -> [ "Today"; x; "" ]) today_times
+     @ List.map (fun x -> [ "Tomorrow"; x; "" ]) tomorrow_times)
+
+let calendar_display, _ =
+  Table.of_list ~h:575
+    ~widths:[ Some 75; Some 100; Some 150 ]
+    calendar_list
 
 let calendar_display_layout =
   L.tower
     [
       L.superpose
         [
-          L.tower [ L.flat_of_w [ calendar_display_label ] ];
+          L.tower
+            [
+              L.flat_of_w [ calendar_display_label ];
+              L.flat [ calendar_display ];
+            ];
           L.flat_of_w [ calendar_display_box ];
         ];
     ]

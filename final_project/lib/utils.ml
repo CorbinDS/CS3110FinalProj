@@ -55,6 +55,9 @@ let times =
   Array.of_list
     (("  " :: (current_day_am_times @ pm_times)) @ next_day_am_times)
 
+let today_times = current_day_am_times @ pm_times
+let tomorrow_times = next_day_am_times
+
 let contains s1 s2 =
   let re = Str.regexp_string s2 in
   try
