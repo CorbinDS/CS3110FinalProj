@@ -104,7 +104,7 @@ let menu_filter_layout =
     ]
 
 (* Filtered menus box *)
-let filtered_display_box = W.box ~style:box_style ~h:550 ~w:300 ()
+let filtered_display_box = W.box ~style:box_style ~h:530 ~w:300 ()
 
 let filtered_display_label =
   W.label "All menus that match the filters: "
@@ -120,7 +120,7 @@ let filtered_menus_layout =
     [
       L.superpose
         [
-          L.tower
+          L.tower ~sep:0
             [
               L.flat_of_w [ filtered_display_label ];
               L.empty ~h:0 ~w:0 ();
@@ -134,23 +134,23 @@ let filtered_menus_layout =
                   show_selected_menus;
                 ];
             ];
-          L.flat_of_w [ W.label "        " ];
           L.flat_of_w [ filtered_display_box ];
         ];
     ]
 
 (* Update menus and dining halls box*)
-let update_box = W.box ~style:box_style ~h:47 ~w:300 ()
+let update_box = W.box ~style:box_style ~h:85 ~w:300 ()
 let update_menus_button = W.button "Update Menus"
 let update_dining_halls_button = W.button "Update Dining Hall Info."
 
 let update_box_layout =
-  L.tower
+  L.tower ~vmargin:0
     [
-      L.superpose
+      L.superpose ~center:true
         [
           L.tower ~sep:1
             [
+              L.flat_of_w [ W.label "Update" ];
               L.flat_of_w
                 [ update_menus_button; update_dining_halls_button ];
             ];
@@ -174,6 +174,20 @@ let menu_display_layout =
               L.make_clip 400 (L.flat_of_w [ menu_display ]);
             ];
           L.flat_of_w [ menu_display_box ];
+        ];
+    ]
+
+(* Calendar display *)
+let calendar_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
+let calendar_display_label = W.label "Today's Calendar: "
+
+let calendar_display_layout =
+  L.tower
+    [
+      L.superpose
+        [
+          L.tower [ L.flat_of_w [ calendar_display_label ] ];
+          L.flat_of_w [ calendar_display_box ];
         ];
     ]
 
@@ -289,9 +303,10 @@ let layout =
       menu_placeholder;
       L.flat
         [
-          menu_filter_layout;
-          L.tower [ filtered_menus_layout; update_box_layout ];
-          menu_display_layout;
+          L.tower [ menu_filter_layout ];
+          L.tower ~sep:1 [ filtered_menus_layout; update_box_layout ];
+          L.tower [ menu_display_layout ];
+          L.tower [ calendar_display_layout ];
         ];
     ]
 
