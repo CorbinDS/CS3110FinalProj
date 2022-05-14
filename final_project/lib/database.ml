@@ -430,16 +430,16 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
       filter_menus t
         (List.filter
            (fun me ->
-             List.exists
+             List.for_all
                (fun (station, items) ->
-                 List.exists
+                 List.for_all
                    (fun it ->
                      contains
                        (String.lowercase_ascii it)
-                       (String.lowercase_ascii i))
+                       (String.lowercase_ascii i)
+                     = false)
                    items)
                me.menu_items
-             = false
              && List.length me.menu_items >= 1)
            ms)
 
