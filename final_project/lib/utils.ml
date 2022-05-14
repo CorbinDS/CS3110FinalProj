@@ -102,3 +102,10 @@ let return_prev_element e lst =
   List.nth lst
     (if index_of e lst - 1 < 0 then List.length lst - 1
     else index_of e lst - 1)
+
+let is_same_day (t1 : Unix.tm) (t2 : Unix.tm) =
+  if
+    t1.tm_year = t1.tm_year && t1.tm_mon = t2.tm_mon
+    && t1.tm_mday = t2.tm_mday
+  then true
+  else false
