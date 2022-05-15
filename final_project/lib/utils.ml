@@ -112,3 +112,8 @@ let is_same_day (t1 : Unix.tm) (t2 : Unix.tm) =
     && t1.tm_mday = t2.tm_mday
   then true
   else false
+
+let in_time_range hour1 hour2 time =
+  if hour1 > hour2 then
+    (hour1 <= time && time <= 2359) || (0 <= time && time <= hour2)
+  else hour1 <= time && time <= hour2
