@@ -368,17 +368,19 @@ let add_to_calendar_action w =
     let end_time = calendar_input_store.close_h in
     let menu_id_to_add = W.get_text menu_displayed in
     let menu_to_add =
-      filter_menus
-        [
-          Open_During
-            ( parse_time beg_time,
-              parse_time end_time,
-              StrictlyWithinRange );
-        ]
-        [ get_menu_from_identifier menu_id_to_add ]
+      if beg_time = "  " || end_time = "  " || menu_id_to_add = "" then
+        []
+      else
+        filter_menus
+          [
+            Open_During
+              ( parse_time beg_time,
+                parse_time end_time,
+                StrictlyWithinRange );
+          ]
+          [ get_menu_from_identifier menu_id_to_add ]
     in
-    if beg_time = "  " || end_time = "  " || List.length menu_to_add < 1
-    then ()
+    if List.length menu_to_add < 1 then ()
     else
       menu_list :=
         List.map2
