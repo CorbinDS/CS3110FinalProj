@@ -306,19 +306,23 @@ let menu_from_json json =
       |> List.map (fun xs -> menu_items_from_json xs);
   }
 
+type in_range_spec =
+  | StrictlyWithinRange
+  | PartiallyWithinRange
+
 type dining_hall_attributes =
   | Nothing
   | Dining_Name of string
   | Campus_Location of string
   | Contact of string
-  | Open_During of int * int
+  | Open_During of int * int * in_range_spec
   | Description of string
 
 type menu_attributes =
   | Nothing
   | Eateries of d list
   | Menu_Name of string
-  | Open_During of int * int
+  | Open_During of int * int * in_range_spec
   | Item of string
   | Avoid of string
 
@@ -350,16 +354,24 @@ let rec filter_dining_halls
            (fun (dining_hall : d) ->
              if dining_hall.contact = c then true else false)
            ds)
-  | Open_During (o, e) :: t ->
+  | Open_During (o, e, s) :: t ->
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
              List.exists
                (fun hours ->
                  try
-                   in_time_range (List.nth hours 0) (List.nth hours 1) o
-                   || in_time_range (List.nth hours 0)
-                        (List.nth hours 1) e
+                   match s with
+                   | StrictlyWithinRange ->
+                       in_time_range (List.nth hours 0)
+                         (List.nth hours 1) o
+                       && in_time_range (List.nth hours 0)
+                            (List.nth hours 1) e
+                   | PartiallyWithinRange ->
+                       in_time_range (List.nth hours 0)
+                         (List.nth hours 1) o
+                       || in_time_range (List.nth hours 0)
+                            (List.nth hours 1) e
                  with Failure x -> false)
                dining_hall.ophours)
            ds)
@@ -393,15 +405,22 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
              then true
              else false)
            ms)
-  | Open_During (o, e) :: t ->
+  | Open_During (o, e, s) :: t ->
       filter_menus t
         (List.filter
            (fun (menu : m) ->
              try
-               in_time_range (List.nth menu.hours 0)
-                 (List.nth menu.hours 1) o
-               || in_time_range (List.nth menu.hours 0)
-                    (List.nth menu.hours 1) e
+               match s with
+               | StrictlyWithinRange ->
+                   in_time_range (List.nth menu.hours 0)
+                     (List.nth menu.hours 1) o
+                   && in_time_range (List.nth menu.hours 0)
+                        (List.nth menu.hours 1) e
+               | PartiallyWithinRange ->
+                   in_time_range (List.nth menu.hours 0)
+                     (List.nth menu.hours 1) o
+                   || in_time_range (List.nth menu.hours 0)
+                        (List.nth menu.hours 1) e
              with Failure x -> false)
            ms)
   | Item i :: t ->

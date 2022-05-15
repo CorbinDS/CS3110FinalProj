@@ -29,19 +29,23 @@ val pretty_print_dining : d -> string
 val pretty_print_menu : m -> string
 (** [pretty_print_menu m] creates a string of menu [m]. *)
 
+type in_range_spec =
+  | StrictlyWithinRange
+  | PartiallyWithinRange
+
 type dining_hall_attributes =
   | Nothing
   | Dining_Name of string
   | Campus_Location of string
   | Contact of string
-  | Open_During of int * int
+  | Open_During of int * int * in_range_spec
   | Description of string
 
 type menu_attributes =
   | Nothing
   | Eateries of d list
   | Menu_Name of string
-  | Open_During of int * int
+  | Open_During of int * int * in_range_spec
   | Item of string
   | Avoid of string
 

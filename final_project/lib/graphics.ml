@@ -160,7 +160,7 @@ let menu_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
 let menu_display_label = W.label "Selected Menu: "
 let menu_display = W.text_display ~h:2000 ~w:250 ""
 let menu_displayed = W.text_display ~h:32 ~w:(225 - 75) ""
-let calendar_input_store = { open_h = ""; close_h = "" }
+let calendar_input_store = { open_h = "  "; close_h = "  " }
 
 let calendar_store_open index =
   calendar_input_store.open_h <- times.(index)
@@ -240,7 +240,7 @@ let time_col =
       length = Array.length times - 1;
       rows = (fun i -> L.resident (W.label time_array.(i)));
       compare = None;
-      width = Some 50;
+      width = Some 55;
     }
 
 let menu_list =
@@ -289,7 +289,9 @@ let all_dining_inputs () : dining_hall_attributes list =
      Nothing
     else
       Open_During
-        (parse_time time_store.open_h, parse_time time_store.close_h));
+        ( parse_time time_store.open_h,
+          parse_time time_store.close_h,
+          PartiallyWithinRange ));
   ]
 
 let all_menu_inputs () : menu_attributes list =
@@ -304,7 +306,9 @@ let all_menu_inputs () : menu_attributes list =
      Nothing
     else
       Open_During
-        (parse_time time_store.open_h, parse_time time_store.close_h));
+        ( parse_time time_store.open_h,
+          parse_time time_store.close_h,
+          PartiallyWithinRange ));
     Eateries (filter_dining_halls (all_dining_inputs ()) dining_halls);
   ]
 
@@ -362,17 +366,30 @@ let add_to_calendar_action w =
   if W.get_state add_to_calendar_button then (
     let beg_time = calendar_input_store.open_h in
     let end_time = calendar_input_store.close_h in
-    let menu_to_add = W.get_text menu_displayed in
-    menu_list :=
-      List.map2
-        (fun tm m ->
-          if
-            in_time_range (parse_time beg_time) (parse_time end_time)
-              (parse_time tm)
-            = true
-          then menu_to_add
-          else m)
-        time_list !menu_list;
+    let menu_id_to_add = W.get_text menu_displayed in
+    let menu_to_add =
+      filter_menus
+        [
+          Open_During
+            ( parse_time beg_time,
+              parse_time end_time,
+              StrictlyWithinRange );
+        ]
+        [ get_menu_from_identifier menu_id_to_add ]
+    in
+    if beg_time = "  " || end_time = "  " || List.length menu_to_add < 1
+    then ()
+    else
+      menu_list :=
+        List.map2
+          (fun tm m ->
+            if
+              in_time_range (parse_time beg_time) (parse_time end_time)
+                (parse_time tm)
+              = true
+            then menu_id_to_add
+            else m)
+          time_list !menu_list;
     let menu_col =
       let menu_array = Array.of_list !menu_list in
       Table.
@@ -388,6 +405,24 @@ let add_to_calendar_action w =
       Table.create ~h:575 [ day_col; time_col; menu_col ]
     in
     L.set_rooms ~sync:true calendar_display [ new_calendar ])
+
+let clear_calendar_action w =
+  menu_list := List.map (fun m -> "") !menu_list;
+  let menu_col =
+    let menu_array = Array.of_list !menu_list in
+    Table.
+      {
+        title = "Menu";
+        length = Array.length times - 1;
+        rows = (fun i -> L.resident (W.label menu_array.(i)));
+        compare = None;
+        width = Some 160;
+      }
+  in
+  let new_calendar, _ =
+    Table.create ~h:575 [ day_col; time_col; menu_col ]
+  in
+  L.set_rooms ~sync:true calendar_display [ new_calendar ]
 
 (* Connections *)
 let show_filtered =
@@ -413,7 +448,12 @@ let update_dining_halls_connection =
   W.on_release update_dining_halls_action update_dining_halls_button
 
 let add_to_calendar_connection =
-  W.on_release add_to_calendar_action add_to_calendar_button
+  W.on_release add_to_calendar_action add_to_calendar_button;
+  W.on_click add_to_calendar_action add_to_calendar_button
+
+let clear_calendar_connection =
+  W.on_release clear_calendar_action clear_calendar_button;
+  W.on_click clear_calendar_action clear_calendar_button
 
 let layout =
   L.tower
