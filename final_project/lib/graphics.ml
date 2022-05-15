@@ -309,7 +309,8 @@ let all_menu_inputs () : menu_attributes list =
         ( parse_time time_store.open_h,
           parse_time time_store.close_h,
           PartiallyWithinRange ));
-    Eateries (filter_dining_halls (all_dining_inputs ()) dining_halls);
+    Eateries
+      (filter_dining_halls (all_dining_inputs ()) (dining_halls ()));
   ]
 
 (* Actions *)
@@ -320,7 +321,7 @@ let possible_menus_action ti l _ =
          String.concat ""
            (List.map
               (fun m -> Database.menu_identifier m ^ "\n")
-              (filter_menus (all_menu_inputs ()) menus))
+              (filter_menus (all_menu_inputs ()) (menus ())))
        with Failure x -> "Nothing.");
     W.set_text selected_menu "")
   else ()
@@ -331,7 +332,7 @@ let change_selected_menu_next ti l _ =
       (return_next_element (W.get_text l)
          (List.map
             (fun m -> Database.menu_identifier m)
-            (filter_menus (all_menu_inputs ()) menus)))
+            (filter_menus (all_menu_inputs ()) (menus ()))))
   else ()
 
 let change_selected_menu_back ti l _ =
@@ -340,7 +341,7 @@ let change_selected_menu_back ti l _ =
       (return_prev_element (W.get_text l)
          (List.map
             (fun m -> Database.menu_identifier m)
-            (filter_menus (all_menu_inputs ()) menus)))
+            (filter_menus (all_menu_inputs ()) (menus ()))))
   else ()
 
 let menu_display_action ti l _ =

@@ -5,10 +5,10 @@ type d
 type m
 (**The abstract type of the dining hall menus.*)
 
-val dining_halls : d list
+val dining_halls : unit -> d list
 (** [dining halls] is a list of the dining halls in the database. *)
 
-val menus : m list
+val menus : unit -> m list
 (** [menus] is a list of the menus in the database. *)
 
 val update_nutritional_information : unit -> unit

@@ -455,7 +455,7 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
              && List.length me.menu_items >= 1)
            ms)
 
-let dining_halls =
+let dining_halls () =
   Sys.chdir "database";
   Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
   (Sys.chdir "dining_halls";
@@ -467,7 +467,7 @@ let dining_halls =
   Sys.chdir "..";
   d
 
-let menus =
+let menus () =
   Sys.chdir "database";
   Sys.readdir "menus" |> Array.to_list |> fun files ->
   (Sys.chdir "menus";
@@ -493,6 +493,6 @@ let get_menu_from_identifier idt =
                   (String.trim
                      (List.nth (String.split_on_char ':' idt) 1));
               ]
-              dining_halls);
+              (dining_halls ()));
        ]
-       menus)
+       (menus ()))
