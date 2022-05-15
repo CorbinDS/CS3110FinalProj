@@ -353,12 +353,15 @@ let menu_display_action ti l _ =
   else ()
 
 let update_menus_action w =
-  if W.get_state update_menus_button then update_menus () |> fun x -> ()
+  if W.get_state update_menus_button then
+    update_menus () |> fun x ->
+    update_dining_halls () |> fun x -> ()
   else ()
 
 let update_dining_halls_action w =
   if W.get_state update_dining_halls_button then
-    update_dining_halls () |> fun x -> ()
+    update_dining_halls () |> fun x ->
+    update_menus () |> fun x -> ()
   else ()
 
 let add_to_calendar_action w =
