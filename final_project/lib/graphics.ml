@@ -105,7 +105,6 @@ let menu_filter_layout =
 
 (* Filtered menus box *)
 let filtered_display_box = W.box ~style:box_style ~h:530 ~w:300 ()
-let filtered_display_label = W.label "Filtered Menus: "
 let filtered_menus = W.text_display "" ~h:2000 ~w:250
 let selected_menu = W.text_display "" ~h:30 ~w:250
 let menu_selector_next = W.button "Next"
@@ -119,7 +118,7 @@ let filtered_menus_layout =
         [
           L.tower ~sep:0
             [
-              L.flat_of_w [ filtered_display_label ];
+              L.flat_of_w [ W.label "Filtered Menus: " ];
               L.empty ~h:0 ~w:0 ();
               L.make_clip 350 (L.flat_of_w [ filtered_menus ]);
               L.flat_of_w [ W.label "Selected: " ];
@@ -157,7 +156,6 @@ let update_box_layout =
 
 (* Selected menu display box *)
 let menu_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
-let menu_display_label = W.label "Selected Menu: "
 let menu_display = W.text_display ~h:2000 ~w:250 ""
 let menu_displayed = W.text_display ~h:32 ~w:(225 - 75) ""
 let calendar_input_store = { open_h = "  "; close_h = "  " }
@@ -184,7 +182,7 @@ let menu_display_layout =
         [
           L.tower ~sep:1
             [
-              L.flat_of_w [ menu_display_label ];
+              L.flat_of_w [ W.label "Selected Menu: " ];
               L.make_clip 350 (L.flat_of_w [ menu_display ]);
               L.flat_of_w
                 [
