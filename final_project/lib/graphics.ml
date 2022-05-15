@@ -89,7 +89,7 @@ let menu_filter_layout =
                 [
                   W.label
                     "   Check if menu is available at any point in \
-                     this time range"
+                     this range    h |"
                     ~size:10;
                 ];
               dining_layout;
@@ -105,10 +105,7 @@ let menu_filter_layout =
 
 (* Filtered menus box *)
 let filtered_display_box = W.box ~style:box_style ~h:530 ~w:300 ()
-
-let filtered_display_label =
-  W.label "All menus that match the filters: "
-
+let filtered_display_label = W.label "Filtered Menus: "
 let filtered_menus = W.text_display "" ~h:2000 ~w:250
 let selected_menu = W.text_display "" ~h:30 ~w:250
 let menu_selector_next = W.button "Next"
@@ -150,7 +147,7 @@ let update_box_layout =
         [
           L.tower ~sep:1
             [
-              L.flat_of_w [ W.label "Update" ];
+              L.flat_of_w [ W.label "Update   x" ];
               L.flat_of_w
                 [ update_menus_button; update_dining_halls_button ];
             ];
@@ -160,8 +157,25 @@ let update_box_layout =
 
 (* Selected menu display box *)
 let menu_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
-let menu_display_label = W.label "Menu will be displayed here: "
+let menu_display_label = W.label "Selected Menu: "
 let menu_display = W.text_display ~h:2000 ~w:250 ""
+let menu_displayed = W.text_display ~h:32 ~w:(225 - 75) ""
+let calendar_input_store = { open_h = ""; close_h = "" }
+
+let calendar_store_open index =
+  calendar_input_store.open_h <- times.(index)
+
+let calendar_store_closed index =
+  calendar_input_store.close_h <- times.(index)
+
+let calendar_start_menu_input =
+  Select.create ?action:(Some calendar_store_open) times 0
+
+let calendar_end_menu_input =
+  Select.create ?action:(Some calendar_store_closed) times 0
+
+let add_to_calendar_button = W.button "Add to Calendar"
+let clear_calendar_button = W.button "Clear Entire Calendar"
 
 let menu_display_layout =
   L.tower
@@ -171,7 +185,27 @@ let menu_display_layout =
           L.tower ~sep:1
             [
               L.flat_of_w [ menu_display_label ];
-              L.make_clip 400 (L.flat_of_w [ menu_display ]);
+              L.make_clip 350 (L.flat_of_w [ menu_display ]);
+              L.flat_of_w
+                [
+                  W.text_display ~h:32 ~w:75 "Menu displayed: ";
+                  menu_displayed;
+                ];
+              L.flat_of_w
+                [
+                  W.text_display ~h:32 ~w:225
+                    "Add menu at the following times: ";
+                ];
+              L.flat
+                [
+                  L.resident (W.label "Start: ");
+                  calendar_start_menu_input;
+                  L.resident (W.label "  ");
+                  L.resident (W.label "End: ");
+                  calendar_end_menu_input;
+                ];
+              L.flat_of_w [ add_to_calendar_button ];
+              L.flat_of_w [ clear_calendar_button ];
             ];
           L.flat_of_w [ menu_display_box ];
         ];
@@ -179,12 +213,7 @@ let menu_display_layout =
 
 (* Calendar display *)
 let calendar_display_box = W.box ~style:box_style ~h:650 ~w:375 ()
-let calendar_display_label = W.label "Today's Calendar: "
-
-let calendar_list =
-  [ "Day"; "Time"; "Menu" ]
-  :: (List.map (fun x -> [ "Today"; x; "" ]) today_times
-     @ List.map (fun x -> [ "Tomorrow"; x; "" ]) tomorrow_times)
+let calendar_display_label = W.label "Today's Calendar:      v |"
 
 let day_col =
   let day =
@@ -201,29 +230,31 @@ let day_col =
       width = Some 75;
     }
 
+let time_list = List.tl (Array.to_list times)
+
 let time_col =
-  let time_list = Array.of_list (List.tl (Array.to_list times)) in
+  let time_array = Array.of_list time_list in
   Table.
     {
       title = "Time";
       length = Array.length times - 1;
-      rows = (fun i -> L.resident (W.label time_list.(i)));
+      rows = (fun i -> L.resident (W.label time_array.(i)));
       compare = None;
-      width = Some 100;
+      width = Some 50;
     }
 
+let menu_list =
+  ref (List.map (fun x -> "") (List.tl (Array.to_list times)))
+
 let menu_col =
-  let menu_list =
-    Array.of_list
-      (List.map (fun x -> "") (List.tl (Array.to_list times)))
-  in
+  let menu_array = Array.of_list !menu_list in
   Table.
     {
       title = "Menu";
       length = Array.length times - 1;
-      rows = (fun i -> L.resident (W.label menu_list.(i)));
+      rows = (fun i -> L.resident (W.label menu_array.(i)));
       compare = None;
-      width = Some 150;
+      width = Some 200;
     }
 
 let calendar_display, _ =
@@ -309,12 +340,13 @@ let change_selected_menu_back ti l _ =
   else ()
 
 let menu_display_action ti l _ =
-  if W.get_state show_selected_menus then
+  if W.get_state show_selected_menus then (
     W.set_text l
       (try
          pretty_print_menu
            (get_menu_from_identifier (W.get_text selected_menu))
-       with Failure x -> "Nothing.")
+       with Failure x -> "Nothing.");
+    W.set_text menu_displayed (W.get_text selected_menu))
   else ()
 
 let update_menus_action w =
@@ -325,6 +357,37 @@ let update_dining_halls_action w =
   if W.get_state update_dining_halls_button then
     update_dining_halls () |> fun x -> ()
   else ()
+
+let add_to_calendar_action w =
+  if W.get_state add_to_calendar_button then (
+    let beg_time = calendar_input_store.open_h in
+    let end_time = calendar_input_store.close_h in
+    let menu_to_add = W.get_text menu_displayed in
+    menu_list :=
+      List.map2
+        (fun tm m ->
+          if
+            in_time_range (parse_time beg_time) (parse_time end_time)
+              (parse_time tm)
+            = true
+          then menu_to_add
+          else m)
+        time_list !menu_list;
+    let menu_col =
+      let menu_array = Array.of_list !menu_list in
+      Table.
+        {
+          title = "Menu";
+          length = Array.length times - 1;
+          rows = (fun i -> L.resident (W.label menu_array.(i)));
+          compare = None;
+          width = Some 160;
+        }
+    in
+    let new_calendar, _ =
+      Table.create ~h:575 [ day_col; time_col; menu_col ]
+    in
+    L.set_rooms ~sync:true calendar_display [ new_calendar ])
 
 (* Connections *)
 let show_filtered =
@@ -348,6 +411,9 @@ let update_menus_connection =
 
 let update_dining_halls_connection =
   W.on_release update_dining_halls_action update_dining_halls_button
+
+let add_to_calendar_connection =
+  W.on_release add_to_calendar_action add_to_calendar_button
 
 let layout =
   L.tower
