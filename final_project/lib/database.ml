@@ -33,11 +33,6 @@ type i = {
   ingredients : ing;
 }
 
-let in_time_range hour1 hour2 time =
-  if hour1 > hour2 then
-    (hour1 <= time && time <= 2359) || (0 <= time && time <= hour2)
-  else hour1 <= time && time <= hour2
-
 let pretty_print_dining (dining : d) =
   "Name: " ^ dining.name ^ "\n" ^ "Location: " ^ dining.location ^ "\n"
   ^ "Contact: " ^ dining.contact ^ "\n" ^ "Operating Hours: "
