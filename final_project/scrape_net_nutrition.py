@@ -85,10 +85,8 @@ def update_net_nutrition():
         
         item_ingredient_list["eateries"].append(eatery_dict)
 
-    with open('database/net_nutrition.json', 'w') as json_file:
+    with open('database/net_nutri   tion.json', 'w') as json_file:
         json.dump(item_ingredient_list, json_file)
 
     browser.quit()
 
-
-update_net_nutrition()
