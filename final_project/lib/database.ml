@@ -33,29 +33,25 @@ type i = {
   ingredients : ing;
 }
 
-let in_time_range hour1 hour2 time =
-  if hour1 > hour2 then hour1 <= time && time <= hour2 + 2400
-  else hour1 <= time && time <= hour2
-
 let pretty_print_dining (dining : d) =
   "Name: " ^ dining.name ^ "\n" ^ "Location: " ^ dining.location ^ "\n"
-  ^ "Contact: " ^ dining.contact ^ "\n" ^ "Operating Hours: {"
+  ^ "Contact: " ^ dining.contact ^ "\n" ^ "Operating Hours: "
   ^ String.concat ", "
       (List.map
-         (fun s ->
-           "{" ^ String.concat ", " (List.map string_of_int s) ^ "}")
+         (fun s -> String.concat "-" (List.map string_of_int s))
          dining.ophours)
-  ^ "}\n" ^ "Description: " ^ dining.description
+  ^ "\n" ^ "Description: " ^ dining.description
 
 let pretty_print_menu (menu : m) =
   pretty_print_dining menu.eatery
-  ^ "\n\n" ^ "Menu Name: " ^ menu.menu_name ^ "\n" ^ "Hours: "
-  ^ String.concat ", " (List.map string_of_int menu.hours)
-  ^ "\n" ^ "Menu Items: "
-  ^ String.concat ", "
+  ^ "\n\n" ^ menu.menu_name ^ "\n" ^ "Hours: "
+  ^ String.concat "-" (List.map string_of_int menu.hours)
+  ^ "\n\n" ^ "Items: \n"
+  ^ String.concat "\n"
       (List.map
          (fun (station, items) ->
-           "\n(" ^ station ^ ": " ^ String.concat ", " items ^ ")")
+           if station = "" then String.concat ", " items
+           else station ^ ": " ^ String.concat ", " items)
          menu.menu_items)
 
 let add_d_to_file record file =
@@ -99,7 +95,7 @@ let webpage () =
 (** [active eateries] is a list of active eateries for the current day.
     Requires: All of the headings for eateries being displayed in
     https://scl.cornell.edu/residential-life/dining/eateries-menus need
-    to be the only elements that are a[hreflang] elements. =*)
+    to be the only elements that are a[hreflang] elements. *)
 let active_eateries () =
   string_of_uri
     "https://scl.cornell.edu/residential-life/dining/eateries-menus"
@@ -204,13 +200,13 @@ let web_into_d hallinfo =
 
 let web_into_m
     (hallinfo : string list)
-    (hours : int list list)
+    (hours_t : int list list)
     (hall_menu : string list) : m list =
   [
     {
       eatery = web_into_d hallinfo;
       menu_name = "Menu";
-      hours = (try List.hd hours with Failure x -> []);
+      hours = (try List.hd hours_t with Failure x -> []);
       menu_items = get_menu_items hall_menu;
     };
   ]
@@ -267,9 +263,11 @@ let update_dining_halls () =
            (String.map (fun c -> if c = ' ' then '_' else c) x.name))
 
 let update_menus () =
+  print_endline (Sys.getcwd ());
   Sys.chdir "database";
   remove_contents "menus";
   Sys.chdir "..";
+  print_endline (Sys.getcwd ());
   List.map web_into_m_list (dininginfo ())
   |> List.map (fun xs ->
          List.map
@@ -308,20 +306,25 @@ let menu_from_json json =
       |> List.map (fun xs -> menu_items_from_json xs);
   }
 
+type in_range_spec =
+  | StrictlyWithinRange
+  | PartiallyWithinRange
+
 type dining_hall_attributes =
   | Nothing
-  | Name of string
+  | Dining_Name of string
   | Campus_Location of string
   | Contact of string
-  | Open_During of int * int
+  | Open_During of int * int * in_range_spec
   | Description of string
 
 type menu_attributes =
   | Nothing
   | Eateries of d list
-  | Name of string
-  | Open_During of int * int
+  | Menu_Name of string
+  | Open_During of int * int * in_range_spec
   | Item of string
+  | Avoid of string
 
 let rec filter_dining_halls
     (attr : dining_hall_attributes list)
@@ -329,7 +332,7 @@ let rec filter_dining_halls
   match attr with
   | [] -> ds
   | Nothing :: t -> filter_dining_halls t ds
-  | Name n :: t ->
+  | Dining_Name n :: t ->
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
@@ -351,16 +354,24 @@ let rec filter_dining_halls
            (fun (dining_hall : d) ->
              if dining_hall.contact = c then true else false)
            ds)
-  | Open_During (o, e) :: t ->
+  | Open_During (o, e, s) :: t ->
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
              List.exists
                (fun hours ->
                  try
-                   in_time_range (List.nth hours 0) (List.nth hours 1) o
-                   || in_time_range (List.nth hours 0)
-                        (List.nth hours 1) e
+                   match s with
+                   | StrictlyWithinRange ->
+                       in_time_range (List.nth hours 0)
+                         (List.nth hours 1) o
+                       && in_time_range (List.nth hours 0)
+                            (List.nth hours 1) e
+                   | PartiallyWithinRange ->
+                       in_time_range (List.nth hours 0)
+                         (List.nth hours 1) o
+                       || in_time_range (List.nth hours 0)
+                            (List.nth hours 1) e
                  with Failure x -> false)
                dining_hall.ophours)
            ds)
@@ -384,7 +395,7 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
            (fun menu ->
              List.exists (fun hall -> hall = menu.eatery) halls)
            ms)
-  | Name name :: t ->
+  | Menu_Name name :: t ->
       filter_menus t
         (List.filter
            (fun menu ->
@@ -394,15 +405,22 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
              then true
              else false)
            ms)
-  | Open_During (o, e) :: t ->
+  | Open_During (o, e, s) :: t ->
       filter_menus t
         (List.filter
            (fun (menu : m) ->
              try
-               in_time_range (List.nth menu.hours 0)
-                 (List.nth menu.hours 1) o
-               || in_time_range (List.nth menu.hours 0)
-                    (List.nth menu.hours 1) e
+               match s with
+               | StrictlyWithinRange ->
+                   in_time_range (List.nth menu.hours 0)
+                     (List.nth menu.hours 1) o
+                   && in_time_range (List.nth menu.hours 0)
+                        (List.nth menu.hours 1) e
+               | PartiallyWithinRange ->
+                   in_time_range (List.nth menu.hours 0)
+                     (List.nth menu.hours 1) o
+                   || in_time_range (List.nth menu.hours 0)
+                        (List.nth menu.hours 1) e
              with Failure x -> false)
            ms)
   | Item i :: t ->
@@ -420,8 +438,24 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
                me.menu_items
              && List.length me.menu_items >= 1)
            ms)
+  | Avoid i :: t ->
+      filter_menus t
+        (List.filter
+           (fun me ->
+             List.for_all
+               (fun (station, items) ->
+                 List.for_all
+                   (fun it ->
+                     contains
+                       (String.lowercase_ascii it)
+                       (String.lowercase_ascii i)
+                     = false)
+                   items)
+               me.menu_items
+             && List.length me.menu_items >= 1)
+           ms)
 
-let dining_halls =
+let dining_halls () =
   Sys.chdir "database";
   Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
   (Sys.chdir "dining_halls";
@@ -433,7 +467,7 @@ let dining_halls =
   Sys.chdir "..";
   d
 
-let menus =
+let menus () =
   Sys.chdir "database";
   Sys.readdir "menus" |> Array.to_list |> fun files ->
   (Sys.chdir "menus";
@@ -443,3 +477,22 @@ let menus =
   Sys.chdir "..";
   Sys.chdir "..";
   m
+
+let menu_identifier (menu : m) =
+  menu.menu_name ^ ": " ^ menu.eatery.name
+
+let get_menu_from_identifier idt =
+  List.hd
+    (filter_menus
+       [
+         Menu_Name (List.hd (String.split_on_char ':' idt));
+         Eateries
+           (filter_dining_halls
+              [
+                Dining_Name
+                  (String.trim
+                     (List.nth (String.split_on_char ':' idt) 1));
+              ]
+              (dining_halls ()));
+       ]
+       (menus ()))

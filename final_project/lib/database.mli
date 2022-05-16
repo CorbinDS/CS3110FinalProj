@@ -5,10 +5,10 @@ type d
 type m
 (**The abstract type of the dining hall menus.*)
 
-val dining_halls : d list
+val dining_halls : unit -> d list
 (** [dining halls] is a list of the dining halls in the database. *)
 
-val menus : m list
+val menus : unit -> m list
 (** [menus] is a list of the menus in the database. *)
 
 val update_nutritional_information : unit -> unit
@@ -29,22 +29,39 @@ val pretty_print_dining : d -> string
 val pretty_print_menu : m -> string
 (** [pretty_print_menu m] creates a string of menu [m]. *)
 
+type in_range_spec =
+  | StrictlyWithinRange
+  | PartiallyWithinRange
+
 type dining_hall_attributes =
   | Nothing
-  | Name of string
+  | Dining_Name of string
   | Campus_Location of string
   | Contact of string
-  | Open_During of int * int
+  | Open_During of int * int * in_range_spec
   | Description of string
 
 type menu_attributes =
   | Nothing
   | Eateries of d list
-  | Name of string
-  | Open_During of int * int
+  | Menu_Name of string
+  | Open_During of int * int * in_range_spec
   | Item of string
+  | Avoid of string
 
 val filter_dining_halls :
   dining_hall_attributes list -> d list -> d list
+(** [filter_dining_halls attrs dining_halls] returns a list of dining
+    halls filtered by the attributes provided. *)
 
 val filter_menus : menu_attributes list -> m list -> m list
+(** [filter_menus attrs dining_halls] returns a list of menus filtered
+    by the attributes provided. *)
+
+val menu_identifier : m -> string
+(** [menu_identifier menu] creates a unique identifier for the menu m,
+    using the menu name and the name of the dining hall.*)
+
+val get_menu_from_identifier : string -> m
+(** [get_menu_from_identifier idt] returns the menu used to make the
+    menu identifier.*)
