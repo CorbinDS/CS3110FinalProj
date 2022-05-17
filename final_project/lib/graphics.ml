@@ -18,29 +18,30 @@ let menu_placeholder = L.empty ~w:650 ~h:0 ()
 
 (* Dining box *)
 let dining_box = W.box ~style:box_style ~h:250 ~w:225 ()
-let dining_name_input = W.text_input ~prompt:"Name" ()
-let dining_location_input = W.text_input ~prompt:"Location" ()
+let dining_name_input = W.text_input ~prompt:"Name  " ()
+let dining_location_input = W.text_input ~prompt:"Location  " ()
 let dining_contact_input = W.text_input ~prompt:"Contact" ()
 let dining_description_input = W.text_input ~prompt:"Description" ()
 
 let dining_layout =
   L.tower
     [
-      L.superpose
+      L.flat_of_w [ W.label "Dining Hall Name: "; dining_name_input ];
+      L.flat_of_w [ W.label "Campus Location: "; dining_location_input ];
+    ]
+
+let bad_ingredient_input = W.text_input ~prompt:"Ingredient  " ()
+
+let brb_layout =
+  L.tower
+    [
+      L.flat_of_w
         [
-          L.tower
-            [
-              L.flat_of_w [ W.label "Dining Hall: " ];
-              L.empty ~h:0 ~w:0 ();
-              L.flat_of_w [ W.label "Name: "; dining_name_input ];
-              L.flat_of_w
-                [ W.label "Location: "; dining_location_input ];
-              L.flat_of_w [ W.label "Contact: "; dining_contact_input ];
-              L.flat_of_w
-                [ W.label "Description: "; dining_description_input ];
-            ];
-          L.flat_of_w [ dining_box ];
+          W.label ~size:10
+            "Will limit meal options to Net Nutrition eateries only    ";
         ];
+      L.flat_of_w
+        [ W.label "Ingredients to avoid   "; bad_ingredient_input ];
     ]
 
 (* Menu box *)
@@ -53,9 +54,9 @@ let time_store = { open_h = "  "; close_h = "  " }
 let store_open index = time_store.open_h <- times.(index)
 let store_closed index = time_store.close_h <- times.(index)
 let menu_filter_box = W.box ~style:box_style ~h:650 ~w:275 ()
-let menu_name_input = W.text_input ~prompt:"Name" ()
-let menu_item_input = W.text_input ~prompt:"Item" ()
-let menu_avoid_input = W.text_input ~prompt:"Items to avoid" ()
+let menu_name_input = W.text_input ~prompt:"Name  " ()
+let menu_item_input = W.text_input ~prompt:"Items  " ()
+let menu_avoid_input = W.text_input ~prompt:"Items  " ()
 
 let menu_open_hour_input =
   Select.create ?action:(Some store_open) times 0
@@ -65,6 +66,18 @@ let menu_closed_hour_input =
 
 let possible_menus_button = W.button "Filter"
 
+(* Old menu_filter_layout
+
+   let menu_filter_layout = L.tower [ L.superpose [ L.tower [
+   L.flat_of_w [ W.label "Filter: " ]; L.empty ~h:0 ~w:0 (); L.flat_of_w
+   [ W.label " Name: "; menu_name_input ]; L.flat_of_w [ W.label " Item:
+   "; menu_item_input ]; L.flat_of_w [ W.label " Items to avoid: ";
+   menu_avoid_input ]; L.flat [ L.resident (W.label " Hours: ");
+   menu_open_hour_input; L.resident (W.label " to ");
+   menu_closed_hour_input; ]; L.flat_of_w [ W.label " Check if menu is
+   available at any point in \ this range h |" ~size:10; ];
+   dining_layout; L.flat_of_w [ W.label " "; possible_menus_button; ];
+   ]; L.flat_of_w [ menu_filter_box ]; ]; ] *)
 let menu_filter_layout =
   L.tower
     [
@@ -72,12 +85,14 @@ let menu_filter_layout =
         [
           L.tower
             [
-              L.flat_of_w [ W.label "Filter: " ];
+              L.flat_of_w
+                [ W.label ~size:18 "Filter Available Dining Halls  |" ];
               L.empty ~h:0 ~w:0 ();
-              L.flat_of_w [ W.label "   Name: "; menu_name_input ];
-              L.flat_of_w [ W.label "   Item: "; menu_item_input ];
+              L.flat_of_w
+                [ W.label "   Preferred Items: "; menu_item_input ];
               L.flat_of_w
                 [ W.label "   Items to avoid: "; menu_avoid_input ];
+              dining_layout;
               L.flat
                 [
                   L.resident (W.label "   Hours: ");
@@ -89,10 +104,12 @@ let menu_filter_layout =
                 [
                   W.label
                     "   Check if menu is available at any point in \
-                     this range    h |"
+                     this range     |"
                     ~size:10;
                 ];
-              dining_layout;
+              L.flat_of_w
+                [ W.label ~size:18 "Ingredient Filtering     " ];
+              brb_layout;
               L.flat_of_w
                 [
                   W.label "                         ";
@@ -102,6 +119,7 @@ let menu_filter_layout =
           L.flat_of_w [ menu_filter_box ];
         ];
     ]
+    ~background:(L.color_bg (Draw.opaque Draw.pale_grey))
 
 (* Filtered menus box *)
 let filtered_display_box = W.box ~style:box_style ~h:530 ~w:300 ()
@@ -211,7 +229,7 @@ let menu_display_layout =
 
 (* Calendar display *)
 let calendar_display_box = W.box ~style:box_style ~h:650 ~w:375 ()
-let calendar_display_label = W.label "Today's Calendar:      v |"
+let calendar_display_label = W.label "Today's Calendar:       |"
 
 let day_col =
   let day =
@@ -465,8 +483,12 @@ let layout =
       menu_placeholder;
       L.flat
         [
-          L.tower [ menu_filter_layout ];
-          L.tower ~sep:1 [ filtered_menus_layout; update_box_layout ];
+          L.flat
+            [
+              L.tower [ menu_filter_layout ];
+              L.tower ~sep:1
+                [ filtered_menus_layout; update_box_layout ];
+            ];
           L.tower [ menu_display_layout ];
           L.tower [ calendar_display_layout ];
         ];
