@@ -1,5 +1,6 @@
 open Soup
 open Curl
+open Yojson.Basic
 open Yojson.Basic.Util
 open Lymp
 open Sys
@@ -496,3 +497,56 @@ let get_menu_from_identifier idt =
               (dining_halls ()));
        ]
        (menus ()))
+
+(* ADT for net nutrition json file *)
+type item = {
+  name : string;
+  ingredients : string list;
+}
+
+type menu = {
+  name : string;
+  items : item list;
+}
+
+type eatery = {
+  name : string;
+  menus : menu list;
+}
+
+type nn_type = { eateries : eatery list }
+
+let item_of_json json =
+  {
+    name = json |> member "i_name" |> to_string;
+    ingredients =
+      json |> member "ingredients" |> to_string
+      |> String.split_on_char ',';
+  }
+
+let menu_of_json json =
+  {
+    name = json |> member "m_name" |> to_string;
+    items = json |> member "items" |> to_list |> List.map item_of_json;
+  }
+
+let eatery_of_json json =
+  {
+    name = json |> member "e_name" |> to_string;
+    menus = json |> member "menus" |> to_list |> List.map menu_of_json;
+  }
+
+let nn_of_json json =
+  {
+    eateries =
+      json |> member "eateries" |> to_list |> List.map eatery_of_json;
+  }
+
+let base_net_nutrition =
+  Yojson.Basic.from_file "../database/net_nutrition.json" |> nn_of_json
+
+let rec filter_net_nutrition (items : string list) (nn : nn_type) :
+    nn_type =
+  match items with
+  | [] -> nn
+  | h :: t -> { eateries = [] }

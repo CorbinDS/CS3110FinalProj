@@ -10,7 +10,6 @@ def wait(browser, tag):
 
 
 def update_net_nutrition():
-    print("help")
     options = Options()
     options.headless = True
 
@@ -27,7 +26,7 @@ def update_net_nutrition():
         eatery_name = browser.find_by_tag(
             'a[class="cbo_nn_unitNameLink unit__name-link "]')[e].value
         eatery_dict = {}
-        eatery_dict["name"] = eatery_name
+        eatery_dict["e_name"] = eatery_name
         eatery_dict["menus"] = []
         eatery.click()
         
@@ -37,7 +36,7 @@ def update_net_nutrition():
             wait(browser, 'a[class="cbo_nn_menuLink"]')
             menu = browser.find_by_tag('a[class="cbo_nn_menuLink"]')[m]
             menu_name = browser.find_by_tag('a[class="cbo_nn_menuLink"]')[m].value
-            menu_dict["name"] = menu_name
+            menu_dict["m_name"] = menu_name
             menu_dict["items"] = [] 
             menu.click()
 
@@ -45,6 +44,8 @@ def update_net_nutrition():
             #browser.find_by_tag('a[class="cbo_nn_itemHover"]) is a list of all the items in the menu category
             for i in range(len(browser.find_by_tag('a[class="cbo_nn_itemHover"]'))):
                 item_dict = {}
+                item_dict["i_name"] = ""
+                item_dict["ingredients"] = ""
                 wait(browser, 'a[class="cbo_nn_itemHover"]')
                 item = browser.find_by_tag('a[class="cbo_nn_itemHover"]')[i]
                 item_name = browser.find_by_tag('a[class="cbo_nn_itemHover"]')[i].value
@@ -60,7 +61,11 @@ def update_net_nutrition():
                 except:
                     ingredients_label = ""
 
-                item_dict[item_name] = ingredients_label
+                cleaned_ing = ingredients_label.replace(")", "")
+                cleaned_ing = cleaned_ing.replace("(", ",")
+                cleaned_ing = cleaned_ing.replace(", ", ",")
+                item_dict["i_name"] = item_name 
+                item_dict["ingredients"] = cleaned_ing
                 menu_dict["items"].append(item_dict)
 
                 wait(browser, 'btn_nn_nutrition_close')
@@ -72,7 +77,6 @@ def update_net_nutrition():
 
             eatery_dict["menus"].append(menu_dict)
 
-            print("movin along")
 
         wait(browser,
              'a[onclick="NetNutrition.UI.courseListBackBtn(event)"]')
@@ -85,8 +89,10 @@ def update_net_nutrition():
         
         item_ingredient_list["eateries"].append(eatery_dict)
 
-    with open('database/net_nutri   tion.json', 'w') as json_file:
+    with open('database/net_nutrition.json', 'w') as json_file:
         json.dump(item_ingredient_list, json_file)
 
     browser.quit()
 
+
+update_net_nutrition()
