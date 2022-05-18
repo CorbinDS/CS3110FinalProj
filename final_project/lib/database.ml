@@ -117,67 +117,6 @@ let get_eatery_by_name (name : string) (nn : nn_type): eatery =
 
 let nn_eatery_names () = List.map get_eatery_name (get_net_nutrition ()).eateries
 
-
-(*[new_items_yj f nn] generates a type that matches the format of the 
-  Yojson.Basic.t using the nn information for the current eatery *)
-(*I want to generate `String item.name for every item in every menu of the eatery.
- Since items come in a list in the menu type, the `String of strings will be in a list. 
- Since menus come in a list in the eatery type, If I run functions to complete the above steps,
- then I will be left with a list of `String of strings lists. 
- List.concat combines them all to one `String of string list which is what I need *)
-(*This will likely break if we change the formatting of our json files in the menus folder*)
-let new_items_yj (e_name : string) (nn : nn_type) = (List.map 
-                                                      (fun m -> 
-                                                        (List.map 
-                                                          (fun (i : item) -> `String i.name) m.items))
-                                                      (get_eatery_by_name e_name nn).menus) 
-                                                    |> List.concat 
-
-
-
-(* [replacement_yj f nn] uses a manufactured Yojson.Basic.t type obtained from the 
-helper method new_items_yj and converts it to a Yojson friendly compact json 
-string matching the previously existing syntax for the menu_items section.*)
-let replacement_yj (e_name : string) (nn : nn_type )= `List [`List [`String ""; `List (new_items_yj e_name nn)]] |> Yojson.Basic.to_string 
-
-(*[edit_menu f nn] edits the corresponding dining hall json to match the information in [nn]. 
-  It does this by converting the json file [f] to a string and replacing the menu_items information with information obtained from its helper function
-  replacement_yj. After fixing the string to maintain Yojson's compact string formatting, we can overwrite the original json file to reflect the new information. *)
-let edit_menu (e_name : string) (nn : nn_type) = let str_yj = Yojson.Basic.from_file (e_name) |>
-                                  Yojson.Basic.to_string in 
-                                  Yojson.Basic.from_string 
-                                  (String.sub str_yj 0 
-                                    (String.rindex str_yj ':' + 1) ^ (replacement_yj e_name nn) ^ "}") 
-                                  |> Yojson.Basic.to_file e_name
-
-                                  
-(*[check_and_edit_menu nn f] checks if f has a nn page. If it does, it calls its helper function: edit_menu.*)
-let check_and_edit_menu (nn : nn_type) (f_name : string) = let e_n = Yojson.Basic.from_file (f_name) |> member "eatery" |> member "name" in 
-  if e_n != `Null then let e_str = to_string e_n in  
-    if List.mem e_str (nn_eatery_names ()) then 
-    print_endline "check is good";  
-    edit_menu f_name nn
-  else () 
-
-(*[edit_menu_jsons nn] updates all the menu json files in our database that have corresponding net nutrition pages
-  to reflect the information in our nn data type. This means filtering done to the nn data type will be reflected in the corresponding menu jsons,
-  which will be displayed on the GUI. *)
-
-let edit_menu_jsons (nn : nn_type) : unit =
-  Sys.chdir "database";
-  let just_menus =
-    List.filter
-      (fun s -> String.sub s 0 4 = "Menu")
-      (Array.to_list (Sys.readdir "menus"))
-  in
-  Sys.chdir "menus";
-  List.map (check_and_edit_menu nn) just_menus |> List.hd;
-  Sys.chdir "..";
-  Sys.chdir "..";
-  ()
-
-
-
 (** [add_d_to_file record file] adds the dining hall record to a new
     file with the name file.json. *)
 let add_d_to_file record file =
@@ -197,6 +136,93 @@ let add_m_to_file record file =
   yojson_of_m record |> Yojson.Safe.to_file (file ^ ".json");
   Sys.chdir "..";
   Sys.chdir ".."
+
+(** [menu_items_from_json station] maps the menu items from the json into 
+    (station, items) format. *)
+let menu_items_from_json station =
+  to_string (List.hd station)
+  :: List.map to_string (to_list (List.nth station 1))
+  |> fun list -> (List.hd list, List.tl list)
+
+(** [dining_hall_from_json json] maps the dining halls from the json into the 
+    dining hall record type. *)
+let dining_hall_from_json json =
+  {
+    name = json |> member "name" |> to_string;
+    location = json |> member "location" |> to_string;
+    contact = json |> member "contact" |> to_string;
+    ophours =
+      json |> member "ophours" |> to_list
+      |> List.map (fun xs -> List.map (fun x -> to_int x) (to_list xs));
+    description = json |> member "description" |> to_string;
+  }
+
+(** [menu_from_json json] maps the menu from the json into the 
+    menu record type. *)
+let menu_from_json json =
+  {
+    eatery = json |> member "eatery" |> dining_hall_from_json;
+    menu_name = json |> member "menu_name" |> to_string;
+    hours =
+      json |> member "hours" |> to_list |> List.map (fun x -> to_int x);
+    menu_items =
+      json |> member "menu_items" |> to_list
+      |> List.map (fun x -> to_list x)
+      |> List.map (fun xs -> menu_items_from_json xs);
+  }
+
+let dining_halls () =
+  Sys.chdir "database";
+  Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
+  (Sys.chdir "dining_halls";
+   List.map (fun file ->
+       Yojson.Basic.from_file file |> dining_hall_from_json))
+    files
+  |> fun d ->
+  Sys.chdir "..";
+  Sys.chdir "..";
+  d
+
+let menus () =
+  Sys.chdir "database";
+  Sys.readdir "menus" |> Array.to_list |> fun files ->
+  (Sys.chdir "menus";
+   List.map (fun file -> Yojson.Basic.from_file file |> menu_from_json))
+    files
+  |> fun m ->
+  Sys.chdir "..";
+  Sys.chdir "..";
+  m
+
+
+(*[edit_menu f nn] edits the corresponding dining hall json to match the information in [nn]. 
+  It does this by converting the json file [f] to a string and replacing the menu_items information with information obtained from its helper function
+  replacement_yj. After fixing the string to maintain Yojson's compact string formatting, we can overwrite the original json file to reflect the new information. *)
+let edit_menu (mn : m) (nn : nn_type) = add_m_to_file 
+  { 
+    eatery = mn.eatery; 
+    menu_name = mn.menu_name;
+    hours = mn.hours;
+    menu_items = [("", (List.concat (List.map (fun m -> List.map (fun (i : item) -> i.name) m.items) (get_eatery_by_name mn.eatery.name nn ).menus)))];
+  } (String.map (fun c -> if c = ' ' then '_' else c) (mn.menu_name ^ "_" ^ mn.eatery.name))
+
+
+
+(*[check_and_edit_menu nn f] checks if f has a nn page. If it does, it calls its helper function: edit_menu.*)
+let check_and_edit_menu (nn : nn_type) (mn : m) = if List.mem mn.eatery.name (nn_eatery_names ()) then edit_menu mn nn
+  
+
+(*[edit_menu_jsons nn] updates all the menu json files in our database that have corresponding net nutrition pages
+  to reflect the information in our nn data type. This means filtering done to the nn data type will be reflected in the corresponding menu jsons,
+  which will be displayed on the GUI. *)
+
+let edit_menu_jsons (nn : nn_type) : unit =
+  List.map (check_and_edit_menu nn) (menus ()) |> List.hd
+  
+
+
+
+
 
 (* This function was copied from:
    https://stackoverflow.com/questions/4621454/reading-html-contents-of-a-url-in-ocaml*)
@@ -432,42 +458,10 @@ let update_menus () =
                (String.map
                   (fun c -> if c = ' ' then '_' else c)
                   (x.menu_name ^ "_" ^ x.eatery.name)))
-           xs);
+           xs) |> List.hd |> List.hd;
   edit_menu_jsons (get_net_nutrition ())
 
-(** [menu_items_from_json station] maps the menu items from the json into 
-    (station, items) format. *)
-let menu_items_from_json station =
-  to_string (List.hd station)
-  :: List.map to_string (to_list (List.nth station 1))
-  |> fun list -> (List.hd list, List.tl list)
 
-(** [dining_hall_from_json json] maps the dining halls from the json into the 
-    dining hall record type. *)
-let dining_hall_from_json json =
-  {
-    name = json |> member "name" |> to_string;
-    location = json |> member "location" |> to_string;
-    contact = json |> member "contact" |> to_string;
-    ophours =
-      json |> member "ophours" |> to_list
-      |> List.map (fun xs -> List.map (fun x -> to_int x) (to_list xs));
-    description = json |> member "description" |> to_string;
-  }
-
-(** [menu_from_json json] maps the menu from the json into the 
-    menu record type. *)
-let menu_from_json json =
-  {
-    eatery = json |> member "eatery" |> dining_hall_from_json;
-    menu_name = json |> member "menu_name" |> to_string;
-    hours =
-      json |> member "hours" |> to_list |> List.map (fun x -> to_int x);
-    menu_items =
-      json |> member "menu_items" |> to_list
-      |> List.map (fun x -> to_list x)
-      |> List.map (fun xs -> menu_items_from_json xs);
-  }
 
 type in_range_spec =
   | StrictlyWithinRange
@@ -564,10 +558,10 @@ let rec filter_dining_halls
 let filter_helper_menu (bad_ing : string) (mn : menu) =
   {
     name = mn.name;
-    items =
+    items = 
       List.filter
-        (fun x ->
-          List.mem (String.lowercase_ascii bad_ing) x.ingredients)
+        (fun x -> print_endline (string_of_bool (List.mem (String.lowercase_ascii bad_ing) x.ingredients = false ));
+          List.mem (String.lowercase_ascii bad_ing) x.ingredients = false)
         mn.items;
   }
 
@@ -593,21 +587,24 @@ let rec net_nutrition_filterer (ing : string list) (nn : nn_type) : nn_type =
           
 let ingredient_applicable_menus (ms : m list) = List.filter (fun m -> List.mem m.eatery.name (nn_eatery_names ())) ms 
 
-
+(*  List.map (fun (i : item) -> print_endline i.name) (List.hd (List.hd (filtered_nn.eateries)).menus).items; 
+*)
 let apply_ingredient_filter (ings : string list) (ms : m list) : m list = 
+  print_endline (List.hd (List.hd (List.hd (get_net_nutrition ()).eateries).menus).items).name; 
   let filtered_nn = net_nutrition_filterer (ings) (get_net_nutrition ()) in 
-  let ing_filtered_menus = ingredient_applicable_menus ms in 
+  let () = print_endline (List.hd (List.hd (List.hd (filtered_nn.eateries)).menus).items).name in 
+  let ing_applicable_menus = ingredient_applicable_menus ms in
   let rec filtering_process (f_nn : n) (i_filt_menus : m list) (acc : m list) = 
     match i_filt_menus with 
-    | [] -> []
+    | [] -> acc
     | h :: t -> filtering_process f_nn t (List.append acc [{ 
       eatery = h.eatery; 
       menu_name = h.menu_name;
       hours = h.hours;
-      menu_items = [("", (List.concat (List.map (fun m -> List.map (fun (i : item) -> i.name) m.items) (get_eatery_by_name h.eatery.name f_nn ).menus)))];
+      menu_items = [("", (List.concat (List.map (fun m -> List.map (fun (i : item) -> i.name) m.items) (get_eatery_by_name h.eatery.name f_nn).menus)))];
       }])
   in 
-  filtering_process filtered_nn ing_filtered_menus []
+  filtering_process filtered_nn ing_applicable_menus []
       
 
   
@@ -689,30 +686,9 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
                me.menu_items
              && List.length me.menu_items >= 1)
            ms)
-  | Ingredient s :: t -> filter_menus t (apply_ingredient_filter (String.split_on_char ',' s) ms) 
+  | Ingredient s :: t -> print_endline "Started apply_ingredient_filter"; let tempy = (apply_ingredient_filter (String.split_on_char ',' s) ms) in filter_menus t tempy
 
-let dining_halls () =
-  Sys.chdir "database";
-  Sys.readdir "dining_halls" |> Array.to_list |> fun files ->
-  (Sys.chdir "dining_halls";
-   List.map (fun file ->
-       Yojson.Basic.from_file file |> dining_hall_from_json))
-    files
-  |> fun d ->
-  Sys.chdir "..";
-  Sys.chdir "..";
-  d
 
-let menus () =
-  Sys.chdir "database";
-  Sys.readdir "menus" |> Array.to_list |> fun files ->
-  (Sys.chdir "menus";
-   List.map (fun file -> Yojson.Basic.from_file file |> menu_from_json))
-    files
-  |> fun m ->
-  Sys.chdir "..";
-  Sys.chdir "..";
-  m
 
 let menu_identifier (menu : m) =
   menu.menu_name ^ ": " ^ menu.eatery.name
