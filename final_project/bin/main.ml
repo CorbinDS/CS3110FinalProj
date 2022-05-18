@@ -3,6 +3,8 @@ open Database
 open Graphics
 open Unix
 
+(** [auto_update_menus ()] updates the menus and dining halls if the
+    last time they were updated was not the current day.*)
 let auto_update_menus () =
   Sys.chdir "database";
   if Sys.readdir "menus" = [||] then

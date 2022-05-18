@@ -1,3 +1,5 @@
+(** Utility functions for the other modules. *)
+
 open Str
 
 let rec remove_contents path =

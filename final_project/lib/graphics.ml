@@ -1,3 +1,5 @@
+(** The GUI library. *)
+
 open Utils
 open Database
 open Bogue
