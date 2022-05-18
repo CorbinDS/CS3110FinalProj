@@ -1,3 +1,5 @@
+(** Utility functions for the other modules. *)
+
 val remove_contents : string -> unit
 (** [remove_contents folder] removes the contents of the folder.
     Requires: folder has to be a folder within the current directory.*)

@@ -26,4 +26,5 @@ lines:
 	cloc --by-file --include-lang=OCaml .
 	
 doc:
+	dune build
 	dune build @doc
