@@ -13,6 +13,8 @@ run:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
 
 zip:
+	dune clean
+	ocamlbuild -clean
 	rm -f final_project.zip
 	zip -r final_project.zip . -x@exclude.lst
 
