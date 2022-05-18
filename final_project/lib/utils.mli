@@ -5,12 +5,12 @@ val remove_contents : string -> unit
     Requires: folder has to be a folder within the current directory.*)
 
 val contains : string -> string -> bool
-(** [contains s1 s2] returns true if s1 is in s2. *)
+(** [contains s1 s2] returns true if s2 is in s1. *)
 
 val list_after_element : 'a list -> 'a -> bool -> 'a list
 (** [list_after_element lst element inc] returns the list after the
     first instance of [element] in [lst]. [inc] indicates whether
-    [element] shoudl be included or not. Requires: [element] is in [lst]*)
+    [element] should be included or not. Requires: [element] is in [lst]*)
 
 val list_before_element : 'a list -> 'a -> bool -> 'a list
 (** [list_before_element lst element inc] returns the list before the
