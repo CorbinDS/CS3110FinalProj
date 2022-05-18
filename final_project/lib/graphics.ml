@@ -123,8 +123,19 @@ let menu_filter_layout =
 
 (* Filtered menus box *)
 let filtered_display_box = W.box ~style:box_style ~h:530 ~w:300 ()
-let filtered_menus = W.text_display "" ~h:2000 ~w:250
-let selected_menu = W.text_display "" ~h:30 ~w:250
+
+let filtered_menus =
+  W.text_display
+    (String.concat ""
+       (List.map
+          (fun m -> Database.menu_identifier m ^ "\n")
+          (filter_menus [] (menus ()))))
+    ~h:2000 ~w:250
+
+let selected_menu =
+  W.text_display "Select a menu using the Back, Next, and Show buttons."
+    ~h:30 ~w:250
+
 let menu_selector_next = W.button "Next"
 let menu_selector_back = W.button "Back"
 let show_selected_menus = W.button "Show"
@@ -155,7 +166,12 @@ let filtered_menus_layout =
 (* Update menus and dining halls box*)
 let update_box = W.box ~style:box_style ~h:85 ~w:300 ()
 let update_menus_button = W.button "Update Menus"
-let update_dining_halls_button = W.button "Update Dining Hall Info."
+
+let update_nutritional_information_button =
+  W.button "Update Nutri. Info."
+
+let update_nutritional_information_button_resident =
+  L.resident update_nutritional_information_button
 
 let update_box_layout =
   L.tower ~vmargin:0
@@ -165,12 +181,21 @@ let update_box_layout =
           L.tower ~sep:1
             [
               L.flat_of_w [ W.label "Update   x" ];
-              L.flat_of_w
-                [ update_menus_button; update_dining_halls_button ];
+              L.flat
+                [
+                  L.resident update_menus_button;
+                  update_nutritional_information_button_resident;
+                ];
             ];
           L.flat_of_w [ update_box ];
         ];
     ]
+
+let nutritional_information_notice =
+  Popup.tooltip "Note: this will take about 20 minutes to finish."
+    ~position:Popup.Below
+    ~target:update_nutritional_information_button_resident
+    update_nutritional_information_button update_box_layout
 
 (* Selected menu display box *)
 let menu_display_box = W.box ~style:box_style ~h:650 ~w:300 ()
@@ -376,8 +401,9 @@ let update_menus_action w =
     update_dining_halls () |> fun x -> ()
   else ()
 
-let update_dining_halls_action w =
-  if W.get_state update_dining_halls_button then
+let update_nutritional_information_button_action w =
+  if W.get_state update_nutritional_information_button then
+    update_nutritional_information () |> fun x ->
     update_dining_halls () |> fun x ->
     update_menus () |> fun x -> ()
   else ()
@@ -466,8 +492,9 @@ let show_selected =
 let update_menus_connection =
   W.on_release update_menus_action update_menus_button
 
-let update_dining_halls_connection =
-  W.on_release update_dining_halls_action update_dining_halls_button
+let update_nutritional_information_connection =
+  W.on_release update_nutritional_information_button_action
+    update_nutritional_information_button
 
 let add_to_calendar_connection =
   W.on_release add_to_calendar_action add_to_calendar_button;

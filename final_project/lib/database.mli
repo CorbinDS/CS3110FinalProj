@@ -29,10 +29,13 @@ val pretty_print_dining : d -> string
 val pretty_print_menu : m -> string
 (** [pretty_print_menu m] creates a string of menu [m]. *)
 
+(** Data type to specify whether to check if a time range is strictly
+    within another time range or partially within a time range.*)
 type in_range_spec =
   | StrictlyWithinRange
   | PartiallyWithinRange
 
+(** Data type for dining hall attributes by which to filter dining halls *)
 type dining_hall_attributes =
   | Nothing
   | Dining_Name of string
@@ -41,6 +44,7 @@ type dining_hall_attributes =
   | Open_During of int * int * in_range_spec
   | Description of string
 
+(** Data type for menu attributes by which to filter menus *)
 type menu_attributes =
   | Nothing
   | Eateries of d list

@@ -25,15 +25,6 @@ type m = {
 }
 [@@deriving yojson_of]
 
-type ing =
-  | Simple of string
-  | Complicated of string * ing list
-
-type i = {
-  name : string;
-  ingredients : ing;
-}
-
 let pretty_print_dining (dining : d) =
   "Name: " ^ dining.name ^ "\n" ^ "Location: " ^ dining.location ^ "\n"
   ^ "Contact: " ^ dining.contact ^ "\n" ^ "Operating Hours: "
@@ -55,6 +46,8 @@ let pretty_print_menu (menu : m) =
            else station ^ ": " ^ String.concat ", " items)
          menu.menu_items)
 
+(** [add_d_to_file record file] adds the dining hall record to a new
+    file with the name file.json. *)
 let add_d_to_file record file =
   Sys.chdir "database";
   Sys.chdir "dining_halls";
@@ -63,6 +56,8 @@ let add_d_to_file record file =
   Sys.chdir "..";
   Sys.chdir ".."
 
+(** [add_m_to_file record file] adds the menu record to a new file with
+    the name file.json. *)
 let add_m_to_file record file =
   Sys.chdir "database";
   Sys.chdir "menus";
@@ -85,6 +80,8 @@ let string_of_uri uri =
     Buffer.contents write_buff
   with _ -> raise (URL_Error uri)
 
+(** [webpage ()] is the contents of the eateries webpage that include
+    the dining hall and menu information.*)
 let webpage () =
   list_between_elements
     (string_of_uri
@@ -143,20 +140,23 @@ let available_stations () =
          | Some b -> b)
   |> List.sort_uniq compare
 
-let rec separate_into_dining_halls
-    (web : string list)
-    (active_halls : string list) =
-  match active_halls with
-  | [] -> [ [] ]
-  | [ t ] -> [ list_after_element web t true ]
-  | h :: t ->
-      list_between_elements web h (List.hd t) true false
-      :: separate_into_dining_halls
-           (list_after_element web (List.hd t) true)
-           t
-
+(** [dininginfo ()] is the eateries webpage converted into a string list
+    list of separated by dining hall. For instance, 
+    \[[all menus for dining hall 1],[all menus for dining hall 2],...] *)
 let dininginfo () =
-  separate_into_dining_halls (webpage ()) (active_eateries ())
+  let rec separate_by_dining_halls
+      (web : string list)
+      (active_halls : string list) =
+    match active_halls with
+    | [] -> [ [] ]
+    | [ t ] -> [ list_after_element web t true ]
+    | h :: t ->
+        list_between_elements web h (List.hd t) true false
+        :: separate_by_dining_halls
+             (list_after_element web (List.hd t) true)
+             t
+  in
+  separate_by_dining_halls (webpage ()) (active_eateries ())
 
 (** [parse_time_range str] parses a string, in the format of the
     following examples, to an int. Examples: "12:30am - 1:00am" -> \[30;
@@ -174,9 +174,15 @@ let parse_time_range str =
           else (100 * h) + m + 1200))
     (String.split_on_char '-' str)
 
-let parse_station_offering str : string list =
-  List.map String.trim (String.split_on_char '*' str)
+(** [parse_station_offering station_items] parses the string of station
+    items from a string of items separated by * into a string list.
+    Requires: station_items have the format 'item1 * item2' *)
+let parse_station_offering station_items : string list =
+  List.map String.trim (String.split_on_char '*' station_items)
 
+
+(** [get_menu_items menu] maps the list in the format \[station, item1, item2,...]\
+into [(station, \[items]\)]*)
 let rec get_menu_items (menu : string list) =
   match menu with
   | [] -> [ ("", [ "" ]) ]
@@ -186,6 +192,8 @@ let rec get_menu_items (menu : string list) =
       (h, parse_station_offering (List.hd t))
       :: get_menu_items (List.tl t)
 
+(** [web_into_d hallinfo] takes a dining hall from the webpage and maps it into 
+    the dining hall record type. *)
 let web_into_d hallinfo =
   {
     name = List.hd hallinfo;
@@ -199,6 +207,9 @@ let web_into_d hallinfo =
       List.hd (list_after_element hallinfo "Description" false);
   }
 
+(** [web_to_m hallinfo hours_t hall_menu] is a helper function for 
+    [web_into_m_list hallinfo] specifically to convert the menus from 
+    dining hall on the eateries webpage with only one menu.*)
 let web_into_m
     (hallinfo : string list)
     (hours_t : int list list)
@@ -212,8 +223,10 @@ let web_into_m
     };
   ]
 
+(** [web_into_m_helper hallinfo hours hall_menus menu_types] is 
+    a helper function for [web_into_m_list hallinfo] *)
 let rec web_into_m_list_helper
-    (hallinfo : string list)
+    (hallsinfo : string list)
     (hours : int list list)
     (hall_menus : string list)
     (menu_types : string list) : m list =
@@ -222,7 +235,7 @@ let rec web_into_m_list_helper
   | h :: t ->
       if List.mem h menu_types = true then
         {
-          eatery = web_into_d hallinfo;
+          eatery = web_into_d hallsinfo;
           menu_name = h;
           hours = List.hd hours;
           menu_items =
@@ -233,9 +246,11 @@ let rec web_into_m_list_helper
                    false
                with Not_found -> t);
         }
-        :: web_into_m_list_helper hallinfo (List.tl hours) t menu_types
-      else web_into_m_list_helper hallinfo hours t menu_types
+        :: web_into_m_list_helper hallsinfo (List.tl hours) t menu_types
+      else web_into_m_list_helper hallsinfo hours t menu_types
 
+(** [web_into_m_list hallinfo] takes the menus specified for a singular 
+    dining hall [hallinfo] from the webpage and converts into a list of menus.*)
 let web_into_m_list hallinfo =
   if
     List.length (list_after_element hallinfo "Featuring/Menu" false) = 1
@@ -247,6 +262,9 @@ let web_into_m_list hallinfo =
       (list_after_element hallinfo "Featuring/Menu" false)
       (available_menu_types ())
 
+(** [update_nutritional_information ()] updates the nutritional information in 
+    the database by pulling from the website 
+    https://netnutrition.dining.cornell.edu/NetNutrition/1 *)
 let update_nutritional_information () =
   print_endline "Starting scraping. Wait for end print." |> fun () ->
   get
@@ -254,6 +272,8 @@ let update_nutritional_information () =
     "update_net_nutrition" []
   |> fun x -> print_endline "Finished scraping."
 
+(** [update_dining_halls ()] updates the dining hall information in the 
+    database by pulling from the eateries website.  *)
 let update_dining_halls () =
   Sys.chdir "database";
   remove_contents "dining_halls";
@@ -263,12 +283,12 @@ let update_dining_halls () =
          add_d_to_file x
            (String.map (fun c -> if c = ' ' then '_' else c) x.name))
 
+(** [update_menus ()] updates the menu information in the database by pulling 
+    from the eateries website.  *)
 let update_menus () =
-  print_endline (Sys.getcwd ());
   Sys.chdir "database";
   remove_contents "menus";
   Sys.chdir "..";
-  print_endline (Sys.getcwd ());
   List.map web_into_m_list (dininginfo ())
   |> List.map (fun xs ->
          List.map
@@ -279,11 +299,15 @@ let update_menus () =
                   (x.menu_name ^ "_" ^ x.eatery.name)))
            xs)
 
+(** [menu_items_from_json station] maps the menu items from the json into 
+    (station, items) format. *)
 let menu_items_from_json station =
   to_string (List.hd station)
   :: List.map to_string (to_list (List.nth station 1))
   |> fun list -> (List.hd list, List.tl list)
 
+(** [dining_hall_from_json json] maps the dining halls from the json into the 
+    dining hall record type. *)
 let dining_hall_from_json json =
   {
     name = json |> member "name" |> to_string;
@@ -295,6 +319,8 @@ let dining_hall_from_json json =
     description = json |> member "description" |> to_string;
   }
 
+(** [menu_from_json json] maps the menu from the json into the 
+    menu record type. *)
 let menu_from_json json =
   {
     eatery = json |> member "eatery" |> dining_hall_from_json;
@@ -334,6 +360,8 @@ let rec filter_dining_halls
   | [] -> ds
   | Nothing :: t -> filter_dining_halls t ds
   | Dining_Name n :: t ->
+      (* Shows dining halls where dining hall name passed in is contained in any of
+         the official dining hall names.*)
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
@@ -342,6 +370,8 @@ let rec filter_dining_halls
                (String.lowercase_ascii n))
            ds)
   | Campus_Location l :: t ->
+      (* Shows dining halls where the campus location passed in is contained in any of
+         the campus locations.*)
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
@@ -350,12 +380,17 @@ let rec filter_dining_halls
                (String.lowercase_ascii l))
            ds)
   | Contact c :: t ->
+      (** Shows dinin hls where the contact passed in is an exact match with any of 
+          the dining hall contact numbers.*)
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
              if dining_hall.contact = c then true else false)
            ds)
   | Open_During (o, e, s) :: t ->
+      (** Shows the dining halls that are open during the time period passed in
+      (whether strictly within the dining hall operating hours or partially 
+      within the dining hall operating hours). *)
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
@@ -377,6 +412,8 @@ let rec filter_dining_halls
                dining_hall.ophours)
            ds)
   | Description des :: t ->
+    (** Shows the dining halls where the description passed in is contained 
+        in any of the descriptions of the dining halls. *)
       filter_dining_halls t
         (List.filter
            (fun (dining_hall : d) ->
@@ -391,12 +428,15 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
   | [] -> ms
   | Nothing :: t -> filter_menus t ms
   | Eateries halls :: t ->
+      (* Shows the menus at the eateries specified. *)
       filter_menus t
         (List.filter
            (fun menu ->
              List.exists (fun hall -> hall = menu.eatery) halls)
            ms)
   | Menu_Name name :: t ->
+      (* Shows menus where the menu name passed in is contained in any of
+         the official menu names.*)
       filter_menus t
         (List.filter
            (fun menu ->
@@ -407,6 +447,9 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
              else false)
            ms)
   | Open_During (o, e, s) :: t ->
+      (* Shows the menus that are available during the time period passed in
+      (whether strictly within the menu availability hours or partially 
+      within the menu availability hours). *)
       filter_menus t
         (List.filter
            (fun (menu : m) ->
@@ -425,6 +468,7 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
              with Failure x -> false)
            ms)
   | Item i :: t ->
+      (* Shows the menus where the item passed in is on the menu. *)
       filter_menus t
         (List.filter
            (fun me ->
@@ -440,6 +484,7 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
              && List.length me.menu_items >= 1)
            ms)
   | Avoid i :: t ->
+      (* Shows the menus where the item passed in is not on the menu.*)
       filter_menus t
         (List.filter
            (fun me ->
@@ -516,8 +561,8 @@ type eatery = {
 
 type nn_type = { eateries : eatery list }
 
-(*Convert json to ADT of the items of the menus of eateries on the net
-  nutrition website*)
+(* [item_of_json json] converts [json] to ADT of the items of the menus of eateries on the net
+  nutrition website *)
 let item_of_json json =
   {
     name = json |> member "i_name" |> to_string;
@@ -527,22 +572,22 @@ let item_of_json json =
       |> String.split_on_char ',';
   }
 
-(*Convert json to ADT of the menus of eateries on the net nutrition
-  website*)
+(* [menu_of_json json] converts [json] to ADT of the menus of eateries on the net nutrition
+  website *)
 let menu_of_json json =
   {
     name = json |> member "m_name" |> to_string;
     items = json |> member "items" |> to_list |> List.map item_of_json;
   }
 
-(*Convert json to ADT of the eateries on the net nutrition website*)
+(* [eatery_of_json json] converts [json] to ADT of the eateries on the net nutrition website *)
 let eatery_of_json json =
   {
     name = json |> member "e_name" |> to_string;
     menus = json |> member "menus" |> to_list |> List.map menu_of_json;
   }
 
-(*Obtain ADT of the net nutrition website json*)
+(* [nn_of_json json] obtains ADT from the net nutrition website json *)
 let nn_of_json json =
   {
     eateries =
@@ -556,6 +601,31 @@ let base_net_nutrition =
   Yojson.Basic.from_file
     ("database" ^ Filename.dir_sep ^ "net_nutrition.json")
   |> nn_of_json
+
+let edit_menu (f_name : string) = match Yojson.Basic.from_file (f_name) with 
+| _ -> f_name
+
+let edit_menu_jsons (nn : nn_type) : unit =
+  Sys.chdir "database";
+  let just_menus =
+    List.filter
+      (fun s -> String.sub s 0 4 = "Menu")
+      (Array.to_list (Sys.readdir "menus"))
+  in
+  List.map edit_menu just_menus;
+  Sys.chdir "..";
+  ()
+
+(*match mi with
+| `List a -> List.hd a
+| _ -> `Null;;
+- : t =
+`List
+  [`String "";
+   `List
+     [`String "Starbucks Coffee"; `String "Tazo Tea"; `String "Hot Cocoa";
+      `String "Pepsi Beverages"; `String "Baked Goods"; `String "Grab-n-Go";
+      `String "Salads"; `String "Snack Foods"]]*)
 
 (*[filter_helper_menu bad_ing mn] returns the [mn] with all items that
   have [bad_ing] in them removed*)
@@ -580,10 +650,10 @@ let filter_helper_eatery (bad_ing : string) (er : eatery) =
 (*[filter_net_nutrition bad_ing nn] is the net nutrition information
   with items that have ingredients corresponding to ingredients in
   [bad_ing] removed from every menu.*)
-let rec filter_net_nutrition (ing : string list) (nn : nn_type) :
-    nn_type =
-  match ing with
+let rec filter_net_nutrition (ing : string list) (nn : nn_type) : nn_type =
+  (match ing with
   | [] -> nn
   | h :: t ->
       filter_net_nutrition t
-        { eateries = List.map (filter_helper_eatery h) nn.eateries }
+        { eateries = List.map (filter_helper_eatery h) nn.eateries })
+

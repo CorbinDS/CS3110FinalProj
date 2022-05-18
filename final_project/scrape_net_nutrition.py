@@ -25,6 +25,10 @@ def update_net_nutrition():
             'a[class="cbo_nn_unitNameLink unit__name-link "]')[e]
         eatery_name = browser.find_by_tag(
             'a[class="cbo_nn_unitNameLink unit__name-link "]')[e].value
+
+        if "Cafe" in eatery_name:
+            eatery_name.replace("Cafe", u"Café")
+
         eatery_dict = {}
         eatery_dict["e_name"] = eatery_name
         eatery_dict["menus"] = []
