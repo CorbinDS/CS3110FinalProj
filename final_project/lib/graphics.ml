@@ -332,6 +332,8 @@ let all_menu_inputs () : menu_attributes list =
     else Item (W.get_text menu_item_input));
     (if W.get_text menu_avoid_input = "" then Nothing
     else Avoid (W.get_text menu_avoid_input));
+    (if W.get_text bad_ingredient_input = "" then Nothing
+    else Ingredient (W.get_text bad_ingredient_input));
     (if time_store.open_h = " " && time_store.close_h = " " then Nothing
     else
       Open_During
