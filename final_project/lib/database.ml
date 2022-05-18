@@ -484,46 +484,33 @@ type menu_attributes =
   | Avoid of string
   | Ingredient of string
 
-let rec filter_dining_halls
-    (attr : dining_hall_attributes list)
-    (ds : d list) : d list =
-  match attr with
-  | [] -> ds
-  | Nothing :: t -> filter_dining_halls t ds
-  | Dining_Name n :: t ->
-      (* Shows dining halls where dining hall name passed in is contained in any of
-         the official dining hall names.*)
-      filter_dining_halls t
+(* Shows dining halls where dining hall name passed in is contained in any of
+the official dining hall names.*)
+let filter_dining_hall_by_name n ds = 
         (List.filter
            (fun (dining_hall : d) ->
              contains
                (String.lowercase_ascii dining_hall.name)
                (String.lowercase_ascii n))
            ds)
-  | Campus_Location l :: t ->
-      (* Shows dining halls where the campus location passed in is contained in any of
+  
+(* Shows dining halls where the campus location passed in is contained in any of
          the campus locations.*)
-      filter_dining_halls t
-        (List.filter
+let filter_dining_hall_by_campus_location l ds = 
+  List.filter
            (fun (dining_hall : d) ->
              contains
                (String.lowercase_ascii dining_hall.location)
                (String.lowercase_ascii l))
-           ds)
-  | Contact c :: t ->
-      (** Shows dinin hls where the contact passed in is an exact match with any of 
-          the dining hall contact numbers.*)
-      filter_dining_halls t
-        (List.filter
+           ds
+
+let filter_dining_hall_by_contact c ds = 
+  List.filter
            (fun (dining_hall : d) ->
              if dining_hall.contact = c then true else false)
-           ds)
-  | Open_During (o, e, s) :: t ->
-      (** Shows the dining halls that are open during the time period passed in
-      (whether strictly within the dining hall operating hours or partially 
-      within the dining hall operating hours). *)
-      filter_dining_halls t
-        (List.filter
+           ds
+let filter_dining_hall_by_time_range o e s ds = 
+  List.filter
            (fun (dining_hall : d) ->
              List.exists
                (fun hours ->
@@ -541,17 +528,44 @@ let rec filter_dining_halls
                             (List.nth hours 1) e
                  with Failure x -> false)
                dining_hall.ophours)
-           ds)
-  | Description des :: t ->
-    (** Shows the dining halls where the description passed in is contained 
-        in any of the descriptions of the dining halls. *)
-      filter_dining_halls t
-        (List.filter
+           ds
+
+let filter_dining_hall_by_description des ds = 
+  List.filter
            (fun (dining_hall : d) ->
              contains
                (String.lowercase_ascii dining_hall.description)
                (String.lowercase_ascii des))
-           ds)
+           ds
+
+let rec filter_dining_halls
+    (attr : dining_hall_attributes list)
+    (ds : d list) : d list =
+  match attr with
+  | [] -> ds
+  | Nothing :: t -> filter_dining_halls t ds
+  | Dining_Name n :: t ->
+      filter_dining_halls t
+        (filter_dining_hall_by_name n ds)
+  | Campus_Location l :: t ->
+      filter_dining_halls t
+        (filter_dining_hall_by_campus_location l ds)
+  | Contact c :: t ->
+      (** Shows dinin hls where the contact passed in is an exact match with any of 
+          the dining hall contact numbers.*)
+      filter_dining_halls t
+        (filter_dining_hall_by_contact c ds)
+  | Open_During (o, e, s) :: t ->
+      (** Shows the dining halls that are open during the time period passed in
+      (whether strictly within the dining hall operating hours or partially 
+      within the dining hall operating hours). *)
+      filter_dining_halls t
+        (filter_dining_hall_by_time_range o e s ds)
+  | Description des :: t ->
+    (** Shows the dining halls where the description passed in is contained 
+        in any of the descriptions of the dining halls. *)
+      filter_dining_halls t
+        (filter_dining_hall_by_description des ds)
 
 (*[filter_helper_menu bad_ing mn] returns the [mn] with all items that
   have [bad_ing] in them removed*)
@@ -606,6 +620,13 @@ let apply_ingredient_filter (ings : string list) (ms : m list) : m list =
   in 
   filtering_process filtered_nn ing_applicable_menus []
       
+let apply_eatery_filter (halls : d list) (mn : m) = List.exists (fun hall -> hall = mn.eatery)
+ halls 
+
+let apply_menu_name_filter (name : string) (mn : m) = 
+  if String.lowercase_ascii mn.menu_name = String.lowercase_ascii name
+    then true
+    else false
 
   
 let rec filter_menus (attr : menu_attributes list) (ms : m list) :
@@ -616,21 +637,13 @@ let rec filter_menus (attr : menu_attributes list) (ms : m list) :
   | Eateries halls :: t ->
       (* Shows the menus at the eateries specified. *)
       filter_menus t
-        (List.filter
-           (fun menu ->
-             List.exists (fun hall -> hall = menu.eatery) halls)
-           ms)
+        (List.filter (apply_eatery_filter halls) ms)
   | Menu_Name name :: t ->
       (* Shows menus where the menu name passed in is contained in any of
          the official menu names.*)
       filter_menus t
         (List.filter
-           (fun menu ->
-             if
-               String.lowercase_ascii menu.menu_name
-               = String.lowercase_ascii name
-             then true
-             else false)
+           (apply_menu_name_filter name)
            ms)
   | Open_During (o, e, s) :: t ->
       (* Shows the menus that are available during the time period passed in
